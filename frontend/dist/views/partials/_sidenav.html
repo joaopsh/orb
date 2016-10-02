@@ -1,0 +1,18 @@
+<div ng-controller="SidenavController as sidenav">
+  <md-sidenav md-component-id="left-sidenav" md-whiteframe="4" class="md-sidenav-left">
+    <md-toolbar class="md-theme-indigo">
+      <h1 class="md-toolbar-tools">
+<md-button ng-click="$root.toggleSidenav(&quot;left-sidenav&quot;)" class="md-icon-button">
+<i class="material-icons">menu</i></md-button>
+<span ></span>Menu</h1></md-toolbar>
+    <md-content>
+      <div layout="row" class="user-card"> <img alt="Joao" ng-src="http://cdn-9chat-fun.9cache.com/static/dist/web2/images/avatar-default.png" class="md-avatar" />
+        <div layout="column" layout-align="center" class="info">
+          <h3>João Pedro</h3> <span layout="row" layout-align="center center" ng-click="sidenav.showAccountSettingsDialog()">
+<i class="material-icons">person</i>Minha Conta</span></div>
+      </div>
+      <md-subheader class="md-no-sticky">Meus Amigos:</md-subheader>
+      <orb-contact-list></orb-contact-list>
+    </md-content>
+  </md-sidenav>
+</div>

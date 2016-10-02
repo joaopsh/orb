@@ -1,0 +1,46 @@
+%md-dialog{"aria-label": "Mango (Fruit)"}
+  %form{"ng-cloak": ""}
+    %md-toolbar
+      .md-toolbar-tools
+        %md-button.md-icon-button
+          %md-icon person
+        %h2 Minha Conta
+        %span{flex: " "}
+        %md-button.md-icon-button{ 'ng-click': 'accountSettings.cancel()' }
+          %md-icon{ 'aria-label': 'Close dialog' } close
+    %md-dialog-content
+      .md-dialog-content.account-settings
+        %h4 Dados Gerais
+        %div{ layout: 'row' }
+          %md-input-container
+            %label Nome
+            %input{ 'nd-model': '' }
+          %md-input-container
+            %label Sobrenome
+            %input{ 'nd-model': '' }
+        %h4 Alterar E-mail
+        %div{ layout: 'row' }
+          %md-input-container
+            %label E-mail
+            %input{ 'nd-model': '' }
+          %md-input-container
+            %label Confirmação
+            %input{ 'nd-model': '' }
+        %div.image-upload{ layout: 'row' }
+          %img{ 'ngf-thumbnail': 'accountSettings.file || \'http://cdn-9chat-fun.9cache.com/static/dist/web2/images/avatar-default.png\'' }
+          %md-input-container.md-block
+            %label{ 'ng-bind': 'accountSettings.file.name || \'Carregue sua imagem...\' ' }
+            %input{ 'nd-model': '', disabled: 'disabled' }
+          %md-button.md-primary{ 'ngf-select': 'accountSettings.imageUpload($file, $invalidFiles)', type: 'file', accept: 'image/*' } Carregar
+        %h4 Alterar Senha
+        %div{ layout: 'row' }
+          %md-input-container
+            %label Nova Senha
+            %input{ 'nd-model': '', type: 'password' }
+          %md-input-container
+            %label Confirmação
+            %input{ 'nd-model': '', type: 'password' }
+        %div{ layout: 'row' }
+    %md-dialog-actions{layout: "row"}
+      %md-button.md-primary{"ng-click": "accountSettings.save()"}
+        Salvar

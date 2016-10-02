@@ -1,0 +1,63 @@
+!!!5
+
+%html{ "ng-app": "app" }
+  %head
+    %meta{ charset: 'utf-8' }
+    %title Orb - Chat Por Localização
+    %meta{ name: "viewport", content: "width=device-width, initial-scale=1" }
+
+    / fonts
+    %link{ rel: "stylesheet", href: "https://fonts.googleapis.com/icon?family=Material+Icons" }
+    / ./fonts
+
+    / styles
+    %link{ rel: "stylesheet", href: "/dist/libs/angular-material/css/angular-material.min.css" }
+    %link{ rel: "stylesheet", href: "/dist/styles/app.css" }
+    / ./styles
+  %body
+    / header
+    %ng-include{ src: "'/dist/views/partials/_header.html'" }
+    / ./header
+
+    / aside_menu
+    %ng-include{ src: "'/dist/views/partials/_sidenav.html'" }
+    / ./aside_menu
+
+    / page
+    %div#ui-view{ 'ui-view': ' ' }
+    / ./page
+    
+    / footer
+    %ng-include{ src: "'/dist/views/partials/_footer.html'" }
+    / ./footer
+
+    / libs
+    %script{ src: "/dist/libs/jquery/jquery.min.js" }
+    / ./libs
+
+    / angular
+    %script{ src: "/dist/libs/angular/angular.min.js" }
+    %script{ src: "/dist/libs/angular/angular-cookies.min.js" }
+    %script{ src: "/dist/libs/angular/angular-ui-router.min.js" }
+    %script{ src: "/dist/libs/angular/ngletteravatar.min.js" }
+    %script{ src: "/dist/libs/angular/angular-resource.min.js" }
+
+    %script{ src: "/dist/libs/angular-material/js/angular-material.min.js" }
+    %script{ src: "/dist/libs/angular-material/js/angular-animate.min.js" }
+    %script{ src: "/dist/libs/angular-material/js/angular-aria.min.js" }
+    %script{ src: "/dist/libs/angular-material/js/angular-messages.min.js" }
+
+    %script{ src: "/dist/libs/angular-google-maps/lodash.min.js" }
+    %script{ src: "/dist/libs/angular-google-maps/angular-simple-logger.min.js" }
+    %script{ src: "/dist/libs/angular-google-maps/angular-google-maps.min.js" }
+
+    %script{ src: "/dist/libs/ng-file-upload/ng-file-upload.min.js" }
+    %script{ src: "/dist/libs/query-string/query-string.min.js" }
+    %script{ src: "/dist/libs/angular/angular-oauth2.min.js" }
+    / ./angular
+
+    / application
+    %script{ src: "/dist/scripts/app.js" }
+    / ./application
+
+    

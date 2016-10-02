@@ -1,0 +1,8 @@
+<form name="autocompleteForm">
+  <md-autocomplete md-input-name="autocomplete" md-item-text="item.display" md-items="item in search(searchText)" md-search-text="searchText" md-selected-item="selectedItem">
+    <md-item-template> <span md-highlight-text="searchText">{{ item.name }}</span></md-item-template>
+    <div ng-messages="autocompleteForm.autocomplete.$error">
+      <div ng-message="required">This field is required</div>
+    </div>
+  </md-autocomplete>
+</form>

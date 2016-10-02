@@ -1,0 +1,366 @@
+$search-font-color: #e1e8f9;
+
+header {
+	position: fixed;
+	width: 100%;
+	z-index: 1;
+
+	> .container {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		background-color: rgba(176,164,196,0.5);
+		border-bottom: solid 2px #7500B8;
+		padding: 5px;
+		
+		> .brand {
+			padding-left: 15px;
+
+			> i {
+				color: $purple;
+				margin-right: 15px;
+				transition: 0.3s;
+
+				&:focus {
+					outline: none;
+				}
+
+				&:hover {
+					transition: 0.3s;
+					color: $yellow;
+					cursor: pointer;
+				}
+			}
+		}
+
+		> .menu {
+			padding-left: 20px;
+			padding-right: 20px;
+
+			> ul {
+				display: flex;
+				list-style: none;
+
+				> li {
+					padding-left: 25px;
+					padding-right: 25px;
+					font-weight: 600;
+
+					a {
+						text-decoration: none;
+						color: $purple;
+						transition: color 120ms linear;
+						font-size: 15px;
+						white-space: nowrap;
+
+						&:hover {
+							color: $yellow;
+							transition: color 120ms linear;
+						}
+					}
+
+					.overlay {
+						height: 100%;
+					    width: 100%;
+					    position: fixed;
+					    z-index: 2;
+					    left: 0;
+					    top: 0;
+					    background-color: rgb(0,0,0);
+					    background-color: rgba(52, 1, 84, 0.9);
+					    overflow-x: hidden;
+					    overflow-y: hidden;
+						transition: .5s linear all;
+
+					    &.ng-hide {
+						  height: 0;
+						  transition: .5s linear all;
+
+						}
+
+
+					    > .close {
+							position: absolute;
+						    top: 3%;
+						    right: 3%;
+						    z-index: 3;
+							color: $yellow;
+							transition: 0.5s;
+
+							&:hover {
+								color: $purple;
+								transition: 0.5s;
+								cursor: pointer;
+							}
+
+							> i {
+								font-size: 50px;
+							}
+
+					    }
+
+					    > .overlay-content {
+						    margin-top: 8%;
+						    color: #d5d0d8;
+
+						    h1, h2 {
+								margin: 20px;
+								font-weight: 300;
+								text-align: center;
+
+							}
+
+							h1 {
+								font-size: 50px;
+							}
+
+							h2 {
+								font-size: 28px;
+								margin-top: 30px;
+								margin-bottom: 10px;
+
+							}
+
+							.banner {
+								text-align: center;
+							}
+
+							md-input-container {
+
+								> label {
+									color: #d5d0d8 !important;
+								    font-size: 20px;
+								    font-weight: 300;
+
+								}
+
+								> input {
+									border-color: rgba(208,252,5,0.5) !important;
+									font-size: 20px;
+									color: #d5d0d8;
+									font-weight: 300;
+								}
+							}
+
+							md-checkbox {
+								
+								.md-icon {
+									border-color: rgba(208,252,5,0.5);
+									
+								}
+								
+								&.md-checked {
+									.md-icon {
+										background-color: rgba(208,252,5,1);
+										
+									}
+
+									.md-ink-ripple {
+										background-color: rgba(208,252,5,1);
+
+									}
+								}
+
+								.md-label {
+									font-weight: 400;
+									font-size: 17px;
+								}
+
+							}
+
+							md-checkbox.md-default-theme.md-checked .md-icon:after, md-checkbox.md-checked .md-icon:after {
+								border-color: $purple;
+
+							}
+
+							.md-checkbox {
+								.md-checked {
+									.md-icon {
+										background-color: rgba(208,252,5,1);
+
+									}
+								}
+							}
+
+							a {
+								color: #d5d0d8;
+
+							}
+
+						    > .about {
+						    	margin: 10% 25% 0 25%;
+						    	font-weight: 300;
+
+								> p {
+						    		font-size: 18px;
+						    	}
+
+						    	> h1 {
+						    		font-size: 50px;
+						    		margin-bottom: 25px;
+						    		font-weight: 300;
+						    	}
+						    }
+						}
+
+						&.sign-in {
+							
+							i {
+								font-size: 50px;
+							    color: #d0fc05;
+							    margin: 0px 0 25px 0;
+							    transition: color 120ms linear;
+
+							    &:hover {
+							    	cursor: pointer;
+							    	color: $purple;
+									transition: color 120ms linear;
+
+							    }
+							}
+
+							.forgot-register-wrapper {
+								color: $yellow;
+
+								a {
+									font-size: 17px;
+									font-weight: 400;
+									padding: 0 8px 0 8px;
+
+									&:hover {
+										color: $yellow;
+										transition: color 120ms linear;
+									}
+								}
+							}
+
+							md-input-container:nth-of-type(2) {
+								margin-left: 15px;
+
+							}
+							
+						}
+
+						&.sign-up {
+							h3 {
+								text-align: center;
+							    max-width: 600px;
+							    font-weight: 400;
+							    font-size: 18px;
+							    line-height: 1.4;
+							}
+
+							md-input-container {
+
+								> input {
+									width: 400px;
+								}
+							}
+
+							button {
+								background-color: $yellow;
+    							color: $purple;
+							}
+
+						}
+					}
+				}
+			}
+		}
+
+		> .search {
+			display: flex;
+			margin-left: auto;
+			padding-right: 15px;
+
+			> input {
+				width: 220px;
+				background-color: $purple;
+				color: $search-font-color;
+				border: none;
+				height: 25px;
+    			border-top-left-radius: 20px;
+    			border-bottom-left-radius: 20px;
+				padding-left: 10px;
+				outline: none;
+				font-weight: 600;
+
+			}
+
+			> input:focus {
+				border-top: solid 1px $blue;
+				border-left: solid 1px $blue;
+				border-bottom: solid 1px $blue;
+			}
+
+			> input:focus + span {
+				border-top: solid 1px $blue;
+				border-right: solid 1px $blue;
+				border-bottom: solid 1px $blue;
+
+			}
+
+			> input {
+				@include placeholder {
+				    font-family: Open Sans;
+					color: $search-font-color;
+				}
+			}
+ 
+			> i {
+				background-color: $purple;
+    			padding-top: 2px;
+    			border-top-right-radius: 20px;
+    			border-bottom-right-radius: 20px;
+    			padding-right: 10px;
+    			color: $search-font-color;
+
+    			&:hover {
+					color: #d2ff0d;
+					cursor: pointer;
+				}
+			}
+		}
+
+		> .logo {
+			position: absolute;
+			top: 48%;
+	    	left: 48%;
+	    	z-index: 1;
+
+		}
+	}
+
+	@media all and (max-width: 1200px) {
+	  	.logo {
+	  		display: none;
+	  	}
+	}
+
+	@media all and (max-width: 960px) {
+	  	.container {
+			justify-content: center;
+
+			> .search {
+		  		margin-left: 0;
+		  		padding-right: 0;
+
+		  		> input {
+		  			width: 260px;
+		  			height: 30px;
+		  		}
+
+		  		> span {
+		  			padding-top: 6px;
+		  		}
+		  	}
+
+		  	> .menu {
+		  		> ul {
+		  			padding-left: 0;
+		  		}
+		  	} 
+
+	  	}
+	}
+}

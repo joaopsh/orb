@@ -1,0 +1,31 @@
+<md-sidenav md-component-id="left-sidenav" md-whiteframe="4" id="left-sidenav" class="md-sidenav-left">
+  <md-toolbar class="md-theme-indigo">
+    <h1 class="md-toolbar-tools">
+<md-button ng-click="$root.toggleSidenav(&quot;left-sidenav&quot;)" class="md-icon-button">
+<i class="material-icons">menu</i></md-button>Menu</h1></md-toolbar>
+  <md-content layout-margin=" ">
+    <md-tabs md-border-bottom=" " md-dynamic-height=" ">
+      <md-tab label="Chats">
+        <md-tab-label> <i class="material-icons">chat_bubble</i></md-tab-label>
+        <md-tab-body>
+          <md-list>
+            <md-list-item class="noright"> <img class="md-avatar" />
+              <p>{{ person.name }}</p>
+              <md-checkbox class="md-secondary"></md-checkbox>
+              <md-icon aria-label="Send Email" md-svg-icon="communication:email" class="md-secondary md-hue-3"></md-icon>
+              <md-icon aria-label="Chat" md-svg-icon="communication:message" class="md-secondary"></md-icon>
+            </md-list-item>
+          </md-list>
+        </md-tab-body>
+      </md-tab>
+      <md-tab label="Favs">
+        <md-tab-label> <i class="material-icons">favorite</i></md-tab-label>
+        <md-tab-body>
+          <h1 class="md-display-2">Tab One</h1>
+          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla venenatis ante augue. Phasellus volutpat neque ac dui mattis vulputate. Etiam consequat aliquam cursus. In sodales pretium ultrices. Maecenas lectus est, sollicitudin consectetur
+            felis nec, feugiat ultricies mi.</p>
+        </md-tab-body>
+      </md-tab>
+    </md-tabs>
+  </md-content>
+</md-sidenav>

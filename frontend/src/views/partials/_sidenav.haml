@@ -1,0 +1,19 @@
+%div{ 'ng-controller': 'SidenavController as sidenav' }
+  %md-sidenav.md-sidenav-left{'md-component-id': 'left-sidenav', 'md-whiteframe': '4' }
+    %md-toolbar.md-theme-indigo
+      %h1.md-toolbar-tools
+        %md-button.md-icon-button{ 'ng-click': '$root.toggleSidenav("left-sidenav")' }
+          %i.material-icons menu
+        %span{flex: ""}
+        Menu
+    %md-content
+      .user-card{ layout: 'row' }
+        %img.md-avatar{ alt: "Joao", "ng-src": "http://cdn-9chat-fun.9cache.com/static/dist/web2/images/avatar-default.png" }
+        .info{ layout: 'column', 'layout-align': 'center' }
+          %h3 João Pedro
+          %span{ layout: 'row', 'layout-align': 'center center', 'ng-click': 'sidenav.showAccountSettingsDialog()' }
+            %i.material-icons person
+            Minha Conta
+      %md-subheader.md-no-sticky
+        Meus Amigos:
+      %orb-contact-list

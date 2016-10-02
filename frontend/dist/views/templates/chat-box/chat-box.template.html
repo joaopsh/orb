@@ -1,0 +1,26 @@
+<div class="chat-box">
+  <div ng-click="panelMinimize()" class="header">
+    <div layout="row" class="container">
+      <div class="avatar">
+        <ng-letter-avatar data="Maria" shape="round" fontFamily="Open Sans" fontSize="10px" height="40px" width="40px"></ng-letter-avatar> <span class="status"></span></div>
+      <div class="name">
+        <h1>Maria Silva</h1></div>
+      <div layout="row" layout-align="initial center" class="controls"> <i ng-click="favorite($event)" class="material-icons favorite">star</i>
+        <div class="minimizeToggle"></div>
+      </div> <i ng-click="close($event)" class="material-icons close">close</i></div>
+  </div>
+  <div class="content">
+    <div class="messages-box">
+      <div class="other"><strong>21:40: </strong>Olá, como você está?</div>
+      <div class="me"><strong>21:42: </strong>Olá Maria! Eu estou bem e você?</div>
+      <div class="other"><strong>21:42: </strong>Você está próximo ao cinema, certo? Você poderia me informar se existe fila?</div>
+      <div class="me"><strong>21:40: </strong>Claro! Maria, a fila está um pouco grande, está quase na porta do shopping... =/</div>
+      <div class="other"><strong>21:42: </strong>Haa :(</div>
+      <div class="other"><strong>21:42: </strong>Mas muito obrigado pela informação!</div>
+    </div>
+    <div class="message-control">
+      <div layout="row" layout-align="center center" class="emojis"> <i class="material-icons">insert_emoticon</i></div> <input type="text" />
+      <div layout="row" layout-align="center center" class="send"> <i ng-click="panelMinimize()" class="material-icons">send</i></div>
+    </div>
+  </div>
+</div>

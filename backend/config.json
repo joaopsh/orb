@@ -1,0 +1,6 @@
+{
+
+  "mongodb": "mongodb://localhost/orb",
+  "allowedOrigins": ["http://localhost:3000"]
+
+}

@@ -1,0 +1,21 @@
+%md-tabs{ "md-border-bottom": " ", "md-dynamic-height": " "}
+  %md-tab{ label: "Chats" }
+    %md-tab-label
+      %i.material-icons chat_bubble
+    %md-tab-body
+      %md-list
+        %md-list-item.md-2-line{ 'ng-repeat': 'contact in contactList.contacts', 'ng-click': 'null' }
+          != "<img class=\"md-avatar\" alt=\"{{ contact.name }}\" ng-src=\"{{ contact.avatar }}\"></img>"
+          .md-list-item-text
+            %h3 {{ contact.name }}
+            %p {{ contact.lastMessage.date }} - {{ contact.lastMessage.message }}
+  %md-tab{ label: "Favs"}
+    %md-tab-label
+      %i.material-icons favorite
+    %md-tab-body
+      %md-list
+        %md-list-item.md-2-line{ 'ng-repeat': 'contact in contactList.contacts', 'ng-click': 'null' }
+          != "<img class=\"md-avatar\" alt=\"{{ contact.name }}\" ng-src=\"{{ contact.avatar }}\"></img>"
+          .md-list-item-text
+            %h3 {{ contact.name }}
+            %p {{ contact.lastMessage.date }} - {{ contact.lastMessage.message }}

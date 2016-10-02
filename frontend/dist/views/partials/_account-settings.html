@@ -1,0 +1,21 @@
+<md-dialog aria-label="Mango (Fruit)">
+  <form>
+    <md-toolbar>
+      <div class="md-toolbar-tools">
+        <h2>Mango (Fruit)</h2> <span></span>
+        <md-button ng-click="cancel()" class="md-icon-button">
+          <md-icon aria-label="Close dialog" md-svg-src="img/icons/ic_close_24px.svg"></md-icon>
+        </md-button>
+      </div>
+    </md-toolbar>
+    <md-dialog-content>
+      <div class="md-dialog-content">
+        <h2>Conteúdo...</h2></div>
+    </md-dialog-content>
+    <md-dialog-actions layout="row">
+      <md-button href="http://en.wikipedia.org/wiki/Mango" md-autofocus=" " target="_blank">More on Wikipedia</md-button> <span></span>
+      <md-button ng-click="answer('not useful')">Not Useful</md-button>
+      <md-button ng-click="answer('useful')">Useful</md-button>
+    </md-dialog-actions>
+  </form>
+</md-dialog>

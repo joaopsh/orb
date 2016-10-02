@@ -1,0 +1,28 @@
+<md-tabs md-border-bottom=" " md-dynamic-height=" ">
+  <md-tab label="Chats">
+    <md-tab-label> <i class="material-icons">chat_bubble</i></md-tab-label>
+    <md-tab-body>
+      <md-list>
+        <md-list-item ng-repeat="contact in contactList.contacts" ng-click="null" class="md-2-line"><img class="md-avatar" alt="{{ contact.name }}" ng-src="{{ contact.avatar }}"></img>
+          <div class="md-list-item-text">
+            <h3>{{ contact.name }}</h3>
+            <p>{{ contact.lastMessage.date }} - {{ contact.lastMessage.message }}</p>
+          </div>
+        </md-list-item>
+      </md-list>
+    </md-tab-body>
+  </md-tab>
+  <md-tab label="Favs">
+    <md-tab-label> <i class="material-icons">favorite</i></md-tab-label>
+    <md-tab-body>
+      <md-list>
+        <md-list-item ng-repeat="contact in contactList.contacts" ng-click="null" class="md-2-line"><img class="md-avatar" alt="{{ contact.name }}" ng-src="{{ contact.avatar }}"></img>
+          <div class="md-list-item-text">
+            <h3>{{ contact.name }}</h3>
+            <p>{{ contact.lastMessage.date }} - {{ contact.lastMessage.message }}</p>
+          </div>
+        </md-list-item>
+      </md-list>
+    </md-tab-body>
+  </md-tab>
+</md-tabs>

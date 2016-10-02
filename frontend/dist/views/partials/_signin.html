@@ -1,0 +1,17 @@
+<div ng-show="$parent.menu == 1" class="sign-in overlay">
+  <a href="javascript:void(0)" ng-click="$parent.menu = 0" class="close"> <i class="material-icons">close</i></a>
+  <div ng-controller="SigninController as signin" layout="column" layout-align="center center" class="overlay-content">
+    <div flex=" " class="banner"> <img src="/dist/images/signin-banner.png" />
+      <h1>Olá, bem-vindo ao Orb!</h1>
+      <h2>Acesse sua conta</h2></div>
+    <form flex=" ">
+      <div layout="row" layout-align="center center">
+        <md-input-container> <label>E-mail</label> <input type="text" ng-model="signin.user.email" class="md-block" /></md-input-container>
+        <md-input-container> <label>Senha</label> <input type="password" ng-model="signin.user.password" class="md-block" /></md-input-container> <i ng-click="signin.submit()" class="material-icons">chevron_right</i></div>
+      <md-checkbox ng-model="signin.remember" aria-label="Lembrar-me"
+        class="md-primary">Lembrar-me</md-checkbox>
+      <md-divider></md-divider>
+    </form>
+    <div layout="row" layout-padding=" " class="forgot-register-wrapper"> <a href="javascript:void(0)">Esqueceu sua senha?</a>ou <a href="javascript:void(0)" ng-click="$parent.$parent.menu = 2">Ainda não é cadastrado?</a></div>
+  </div>
+</div>

@@ -1,0 +1,33 @@
+%section.chat-panel
+  .container
+    .chat-box
+      .header
+        .container
+          .avatar
+            %ng-letter-avatar{ data: "Maria", shape: "round", fontFamily: "Open Sans", fontSize: "10px", height: "40px", width: "40px"}
+            %span.status
+          .name
+            %h1 Maria Silva
+          .controls
+            %i.material-icons.close star
+          %i.material-icons.close close
+      .content
+        .messages-box
+          .other
+            != "<strong>21:40: </strong>Olá, como você está?"
+          .me
+            != "<strong>21:42: </strong>Olá Maria! Eu estou bem e você?"
+          .other
+            != "<strong>21:42: </strong>Você está próximo ao cinema, certo? Você poderia me informar se existe fila?"
+          .me
+            != "<strong>21:40: </strong>Claro! Maria, a fila está um pouco grande, está quase na porta do shopping... =/"
+          .other
+            != "<strong>21:42: </strong>Haa :("
+          .other
+            != "<strong>21:42: </strong>Mas muito obrigado pela informação!"
+        .message-control
+          .emojis{ layout: 'row', 'layout-align': 'center center' }
+            %i.material-icons insert_emoticon
+          %input{ type: "text" }
+          .send{ layout: 'row', 'layout-align': 'center center' }
+            %i.material-icons send

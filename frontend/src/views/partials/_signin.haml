@@ -1,0 +1,24 @@
+.sign-in.overlay{ 'ng-show': '$parent.menu == 1' }
+  %a{ href: "javascript:void(0)", 'ng-click': '$parent.menu = 0' }.close
+    %i.material-icons close
+  .overlay-content{ 'ng-controller': 'SigninController as signin', layout: 'column', 'layout-align': 'center center' }
+    .banner{ flex: ' '}
+      %img{ src: "/dist/images/signin-banner.png", alt: "" }
+      %h1 Olá, bem-vindo ao Orb!
+      %h2 Acesse sua conta
+    %form{ flex: ' ' }
+      %div{ layout: 'row', 'layout-align': 'center center' }
+        %md-input-container
+          %label E-mail
+          %input{ type: 'text', 'ng-model': 'signin.user.email' }.md-block
+        %md-input-container
+          %label Senha
+          %input{ type: 'password', 'ng-model': 'signin.user.password' }.md-block
+        %i{ 'ng-click': 'signin.submit()' }.material-icons chevron_right
+      %md-checkbox.md-primary{ 'ng-model': 'signin.remember', 'aria-label': 'Lembrar-me'}
+        Lembrar-me
+      %md-divider
+    %div.forgot-register-wrapper{ layout: 'row', 'layout-padding': ' ' }
+      %a{ href: 'javascript:void(0)' } Esqueceu sua senha?
+      ou
+      %a{ href: 'javascript:void(0)', 'ng-click': '$parent.$parent.menu = 2' } Ainda não é cadastrado?

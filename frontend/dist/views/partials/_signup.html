@@ -1,0 +1,18 @@
+<div ng-show="$parent.menu == 2" class="sign-up overlay">
+  <a href="javascript:void(0)" ng-click="$parent.menu = 0" class="close"> <i class="material-icons">close</i></a>
+  <div ng-controller="SignupController as signup" layout="column" layout-align="center center" class="overlay-content">
+    <div flex=" " class="banner"> <img src="/dist/images/signup-banner.png" />
+      <h1>Registre-se e faça parte!</h1>
+      <h3>Nossa comunidade inteira buscando e compartilhando informações de todo e qualquer lugar do mundo em tempo real.</h3></div>
+    <form flex=" ">
+      <div layout="column" layout-align="center center">
+        <md-input-container> <label>Nome</label> <input type="text" ng-model="signup.user.firstName" class="md-block" /></md-input-container>
+        <md-input-container> <label>Sobrenome</label> <input type="text" ng-model="signup.user.lastName" class="md-block" /></md-input-container>
+        <md-input-container> <label>E-mail</label> <input type="text" ng-model="signup.user.email" class="md-block" /></md-input-container>
+        <md-input-container> <label>Senha</label> <input type="password" ng-model="signup.user.password" class="md-block" /></md-input-container>
+        <md-input-container> <label>Confirmar Senha</label> <input type="password" class="md-block" /></md-input-container>
+        <md-button type="submit" ng-click="signup.submit()">Registrar-se</md-button>
+      </div>
+    </form>
+  </div>
+</div>
