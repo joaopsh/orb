@@ -31,10 +31,19 @@ function orbConfig(
   $urlRouterProvider.otherwise("/home");
 
   $stateProvider
-  .state('home', {
-    url: "/home",
-    templateUrl: "dist/views/home/home.html",
-    controller: "HomeController"
+  .state('orb', {
+    url: "/orb",
+    templateUrl: "dist/views/orb.html",
+    controller: "OrbController"
+  })
+  .state('sign', {
+    url: "/sign",
+    templateUrl: "dist/views/sign.html",
+    controller: "SignController"
+  })
+  .state('about', {
+    url: "/about",
+    templateUrl: "dist/views/about.html",
   });
   
 }

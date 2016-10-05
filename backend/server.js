@@ -1,5 +1,7 @@
 var express = require('express');
 var app = module.exports = express();
+var http = require('http').Server(app);
+var io = require('socket.io')(http);
 
 var mongoose = require('mongoose')
 	, bodyParser = require('body-parser')
@@ -36,9 +38,9 @@ app.use(function(req, res, next) {
 app.post('/oauth/token', oauth.token)
 
 //routes register
-app.use('/user', passport.authenticate('accessToken', { session: false }), userController);
-app.use('/client', clientController);
+app.use('/user', userController);
+app.use('/client', passport.authenticate('accessToken', { session: false }), clientController);
 
-app.listen(1500, function() {
+http.listen(1500, function(){
   console.log('Orb Server running on PORT 1500!');
 });

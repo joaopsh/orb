@@ -1,0 +1,61 @@
+%div{ flex: ' ', layout: 'row' }
+  .title
+    %h1 Sign In or Sign Up
+%div{ 'ng-controller': 'SignController as sign', 'layout-smm': 'column', 'layout-gt-sm': 'row', 'layout-margin': ' ' }
+  %div.signin{ flex: ' ' }
+    .panel
+      .header
+        %i.material-icons account_circle
+        %h1 Sign In
+        %md-divider
+        %p Enter with your e-mail and password
+      %form{ novalidate: ' ', name: 'sign.form.signin', layout: 'column', flex: ' ', 'ng-submit': 'sign.signinSubmit()' }
+        %md-input-container
+          %label E-mail
+          %input{ type: 'text', name: 'email', 'md-no-asterisk': 'true', 'ng-model': 'sign.signin.email', 'required': 'true' }
+          %div{ 'ng-messages': 'sign.form.signin.email.$error'}
+            %div{ 'ng-message': 'required' } It\'s necessary to enter with your e-mail.
+            %div{ 'ng-message': 'emailPassInvalid' } Invalid e-mail or password. Please enter with your e-mail again.
+        %md-input-container
+          %label Password
+          %input{ type: 'password', name: 'password', 'md-no-asterisk': 'true', 'ng-model': 'sign.signin.password', 'required': 'true' }
+          %div{ 'ng-messages': 'sign.form.signin.password.$error'}
+            %div{ 'ng-message': 'required' } It\'s necessary to enter with your password.
+            %div{ 'ng-message': 'emailPassInvalid' } Invalid e-mail or password. Please enter with your password again.
+        %md-button.md-raised{ type: 'submit' } Sign In
+  %div.signup{ flex: ' ' }
+    .panel
+      .header
+        %img{ src: '/dist/images/signup-banner.png' }
+        %p Register now and enjoy our community!
+      %md-divider.divider
+      %form{ novalidate: ' ', name: 'sign.form.signup', layout: 'column', flex: ' ', 'ng-submit': 'signupSubmit', 'ng-submit': 'sign.signupSubmit()' }
+        %div{ layout: 'row' }
+          %md-input-container{ flex: ' ' }
+            %label First Name
+            %input{ type: 'text', name: 'firstName', 'md-no-asterisk': 'true', 'ng-model': 'sign.signup.firstName', 'required': 'true' }
+            %div{ 'ng-messages': 'sign.form.signup.firstName.$error'}
+              %div{ 'ng-message': 'required' } It\'s necessary to enter with your first name.
+          %md-input-container{ flex: ' ' }
+            %label Last Name
+            %input{ type: 'text', name: 'lastName', 'md-no-asterisk': 'true', 'ng-model': 'sign.signup.lastName', 'required': 'true' }
+            %div{ 'ng-messages': 'sign.form.signup.lastName.$error'}
+              %div{ 'ng-message': 'required' } It\'s necessary to enter with your last name.
+        %md-input-container
+          %label E-mail
+          %input{ type: 'text', name: 'email', 'md-no-asterisk': 'true', 'ng-model': 'sign.signup.email'}
+          %div{ 'ng-messages': 'sign.form.signup.email.$error'}
+            %div{ 'ng-message': 'required' } It\'s necessary to enter with your e-mail.
+        %div{ layout: 'row' }
+          %md-input-container{ flex: ' ' }
+            %label Password
+            %input{ type: 'password', name: 'password', 'md-no-asterisk': 'true', 'ng-model': 'sign.signup.password', 'required': 'true', 'id': 'password' }
+            %div{ 'ng-messages': 'sign.form.signup.password.$error'}
+              %div{ 'ng-message': 'required' } It\'s necessary to enter with a password.
+          %md-input-container{ flex: ' ' }
+            %label Confirm Password
+            %input{ type: 'password', name: 'confirmPassword', 'md-no-asterisk': 'true', 'ng-model': 'sign.signup.confirmPassword', 'required': 'true', 'id': 'confirm-password', 'password-check': 'password' }
+            %div{ 'ng-messages': 'sign.form.signup.confirmPassword.$error'}
+              %div{ 'ng-message': 'required' } It\'s necessary confirm the password.
+              %div{ 'ng-message': 'passwordMatch' } Password doesn't match confirmation.
+        %md-button.md-raised{ type: 'submit' } Sign Up

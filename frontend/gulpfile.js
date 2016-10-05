@@ -86,6 +86,9 @@ gulp.task('copy-libs', function() {
     gulp.src('./node_modules/meanie-angular-http-buffer/release/meanie-angular-http-buffer.min.js')
     .pipe(gulp.dest('./dist/libs/angular'));
 
+    gulp.src('./node_modules/particlesjs/dist/particles.min.js')
+    .pipe(gulp.dest('./dist/libs/particlesjs'));
+
 });
 
 // Styles
@@ -156,7 +159,7 @@ gulp.task('watch', function() {
     });
 
     // Watch script files
-    gulp.watch(['src/scripts/**/*.js', 'src/app/**/*.js'], function(event) {
+    gulp.watch(['src/scripts/**/*.js', 'src/app/**/*.js', 'src/app/**/**/*.js'], function(event) {
       console.log('File ' + event.path + ' was ' + event.type + ', running tasks...');
       gulp.start('scripts');
     });

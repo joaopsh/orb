@@ -5,7 +5,7 @@
         <md-button class="md-icon-button">
           <md-icon>person</md-icon>
         </md-button>
-        <h2>Minha Conta</h2> <span flex=" "></span>
+        <h2>My Account</h2> <span flex=" "></span>
         <md-button ng-click="accountSettings.cancel()" class="md-icon-button">
           <md-icon aria-label="Close dialog">close</md-icon>
         </md-button>
@@ -13,30 +13,30 @@
     </md-toolbar>
     <md-dialog-content>
       <div class="md-dialog-content account-settings">
-        <h4>Dados Gerais</h4>
+        <h4>General</h4>
         <div layout="row">
-          <md-input-container> <label>Nome</label> <input /></md-input-container>
-          <md-input-container> <label>Sobrenome</label> <input /></md-input-container>
+          <md-input-container> <label>First Name</label> <input /></md-input-container>
+          <md-input-container> <label>Last Name</label> <input /></md-input-container>
         </div>
-        <h4>Alterar E-mail</h4>
+        <h4>Change E-mail</h4>
         <div layout="row">
           <md-input-container> <label>E-mail</label> <input /></md-input-container>
-          <md-input-container> <label>Confirmação</label> <input /></md-input-container>
+          <md-input-container> <label>Confirm E-mail</label> <input /></md-input-container>
         </div>
         <div layout="row" class="image-upload"> <img ngf-thumbnail="accountSettings.file || 'http://cdn-9chat-fun.9cache.com/static/dist/web2/images/avatar-default.png'" />
-          <md-input-container class="md-block"> <label ng-bind="accountSettings.file.name || 'Carregue sua imagem...' "></label> <input disabled="disabled" /></md-input-container>
-          <md-button ngf-select="accountSettings.imageUpload($file, $invalidFiles)" type="file" accept="image/*" class="md-primary">Carregar</md-button>
+          <md-input-container class="md-block"> <label ng-bind="accountSettings.file.name || 'Load your image...' "></label> <input disabled="disabled" /></md-input-container>
+          <md-button ngf-select="accountSettings.imageUpload($file, $invalidFiles)" type="file" accept="image/*" class="md-primary">Load</md-button>
         </div>
-        <h4>Alterar Senha</h4>
+        <h4>Change Password</h4>
         <div layout="row">
-          <md-input-container> <label>Nova Senha</label> <input type="password" /></md-input-container>
-          <md-input-container> <label>Confirmação</label> <input type="password" /></md-input-container>
+          <md-input-container> <label>Password</label> <input type="password" /></md-input-container>
+          <md-input-container> <label>Confirm Password</label> <input type="password" /></md-input-container>
         </div>
         <div layout="row"></div>
       </div>
     </md-dialog-content>
     <md-dialog-actions layout="row">
-      <md-button ng-click="accountSettings.save()" class="md-primary">Salvar</md-button>
+      <md-button ng-click="accountSettings.save()" class="md-primary">Save</md-button>
     </md-dialog-actions>
   </form>
 </md-dialog>

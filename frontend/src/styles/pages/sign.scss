@@ -1,0 +1,124 @@
+.signin {
+	> .panel {
+		max-width: 350px;
+		margin-left: auto;
+		margin-right: auto;
+		padding: 60px;
+
+		> .header {
+			color: #620798;
+			text-align: center;
+
+			> i {
+				font-size: 100px;
+			}
+
+			> h1 {
+				font-size: 42px;
+   				font-weight: 600;
+				margin-top: 5px;
+			}
+
+			p {
+				font-weight: 400;
+				font-size: 18px;
+			}
+		}
+
+		> form {
+			> md-input-container:not(.md-input-invalid) {
+				label {
+					font-weight: 600;
+					color: rgba(98, 7, 152, 0.8);
+				}
+				.md-input {
+					border-color: rgba(98, 7, 152, 0.8);
+					color: #7500b8;
+				}
+			}
+
+			> md-input-container {
+				margin-top: 10px;
+				margin-bottom: 10px;
+			}
+		}
+
+		button {
+			background-color: #D0FC05;
+
+			span {
+				color: #7500B8;
+			}
+		}
+	}
+}
+
+.signup {
+	> .panel {
+		max-width: 600px;
+		margin-left: auto;
+		margin-right: auto;
+		padding: 60px;
+
+		> .header {
+			color: #620798;
+			text-align: center;
+
+			> p {
+				font-weight: 400;
+				padding-left: 45px;
+    			font-size: 20px;
+			}
+		}
+
+		> .divider {
+			margin-top: 30px;
+    		margin-bottom: 15px;
+		}
+
+		> form {
+			md-input-container:not(.md-input-invalid) {
+				label {
+					font-weight: 600;
+					color: rgba(98, 7, 152, 0.8);
+				}
+				.md-input {
+					border-color: rgba(98, 7, 152, 0.8);
+					color: #7500b8;    
+				}
+				
+				> md-input-container {
+					margin-top: 10px;
+					margin-bottom: 10px;
+				}
+			}
+		}
+
+		button {
+			background-color: $purple;
+
+			span {
+				color: white;
+			}
+
+			&:hover {
+				span {
+					color: #7500B8;
+				}
+			}
+		}
+	}
+}
+
+.title {
+	margin-left: auto;
+	margin-right: auto;
+	color: #620798;
+	padding-left: 10%;
+	padding-right: 10%;
+	border-bottom: solid 4px #e5e2ea;
+
+	> h1 {
+		font-weight: 600;
+	}
+}

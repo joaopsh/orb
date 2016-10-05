@@ -6,11 +6,13 @@
       %img{ src: "/dist/images/signup-banner.png", alt: "" }
       %h1 Registre-se e faça parte!
       %h3 Nossa comunidade inteira buscando e compartilhando informações de todo e qualquer lugar do mundo em tempo real.
-    %form{ flex: ' '}
+    %form{ name: 'form.signUp', flex: ' ', novalidade: ' '}
       %div{ layout: 'column', 'layout-align': 'center center' }
         %md-input-container
           %label Nome
-          %input{ type: 'text', 'ng-model': 'signup.user.firstName' }.md-block
+          %input{ name: 'name', type: 'text', 'ng-model': 'signup.user.firstName', 'ng-required': 'true' }.md-block
+          %div{ "ng-if": "form.signUp.$submitted || form.signUp.name.$touched", "ng-messages": "form.signUp.name.$error" }
+            %div{"ng-message": "required"} É necessário inserir seu nome.
         %md-input-container
           %label Sobrenome
           %input{ type: 'text', 'ng-model': 'signup.user.lastName' }.md-block

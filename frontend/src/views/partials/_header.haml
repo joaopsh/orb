@@ -1,24 +1,20 @@
-%header{ 'ng-controller': 'HeaderController as header' }
-  .container
-    %div.brand{ layout: 'row', 'layout-align': 'start center' }
-      %i.material-icons{ flex: 'nogrow', 'ng-click': '$root.toggleSidenav("left-sidenav")' } menu
-      %img{ src: "/dist/images/brand.png", flex: 'noshrink' }
-    %nav.menu
-      %ul
-        %li
-          %a{ href: "javascript:void(0)", 'ng-click': 'menu = 1' }
-            Entrar
-          %ng-include{ src: "'/dist/views/partials/_signin.html'" }
-        %li
-          %a{ href: "javascript:void(0)", 'ng-click': 'menu = 2' }
-            Registrar-se
-          %ng-include{ src: "'/dist/views/partials/_signup.html'" }
-        %li
-          %a{ href: "javascript:void(0)", 'ng-click': 'menu = 3' }
-            Sobre
-          %ng-include{ src: "'/dist/views/partials/_about.html'" }
-    %div.logo
-      %img{ src: "/dist/images/logo.png" }
-    %div.search
-      %input{ type: "text", placeholder: "Buscar Orbs!" }
-      %i.material-icons{ 'ng-click': '' } search
+%div{ 'ng-controller': 'HeaderController as header' }
+  != "<header ng-class=\"{ fixed: header.isState('orb') }\" >"
+    .container
+      %div.brand{ layout: 'row', 'layout-align': 'start center' }
+        %i.material-icons{ flex: 'nogrow', 'ng-click': '$root.toggleSidenav("left-sidenav")' } menu
+        %img{ src: "/dist/images/brand.png", flex: 'noshrink' }
+      %nav.menu
+        %ul
+          %li
+            %a{ href: "javascript:void(0)", 'ui-sref': 'orb' }
+              Orb
+          %li
+            %a{ href: "javascript:void(0)", 'ui-sref': 'sign' }
+              Sign
+          %li
+            %a{ href: "javascript:void(0)", 'ui-sref': 'about' }
+              About
+      %div.search
+        %input{ type: "text", placeholder: "Buscar Orbs!" }
+        %i.material-icons{ 'ng-click': '' } search

@@ -2,17 +2,15 @@ import { default as orbConfig } from './orb.config';
 
 //controllers import
 import { default as HeaderController } from './controllers/header.controller';
-import { default as HomeController } from './controllers/home.controller';
+import { default as OrbController } from './controllers/orb.controller';
 import { default as MapController } from './controllers/map.controller';
-import { default as SigninController } from './controllers/signin.controller';
-import { default as SignupController } from './controllers/signup.controller';
+import { default as SignController } from './controllers/sign.controller';
 import { default as SidenavController } from './controllers/sidenav.controller';
 
 //services import
-import { default as homeService } from './services/home.service';
+import { default as orbService } from './services/orb.service';
 import { default as mapService } from './services/map.service';
-import { default as signinService } from './services/signin.service';
-import { default as signupService } from './services/signup.service';
+import { default as signService } from './services/sign.service';
 import { default as userService } from './services/user.service';
 
 //directives import
@@ -20,6 +18,7 @@ import { default as contactListDirective } from './directives/contact-list/conta
 import { default as chatPanelDirective } from './directives/chat-panel/chat-panel.directive.js';
 import { default as chatBoxDirective } from './directives/chat-box/chat-box.directive.js';
 import { default as searchDirective } from './directives/search/search.directive.js';
+import { default as passwordCheckDirective } from './directives/password-check/password-check.directive.js';
 
 //orb module
 var orb = angular.module('app.orb', [
@@ -27,6 +26,7 @@ var orb = angular.module('app.orb', [
 , 'angular-oauth2'
 , 'ngResource'
 , 'ngMaterial'
+, 'ngMessages'
 , 'ngLetterAvatar'
 , 'uiGmapgoogle-maps'
 , 'ngAnimate'
@@ -39,18 +39,16 @@ orb.constant('configs', {
 });
 
 //services register
-orb.service('homeService', homeService);
+orb.service('orbService', orbService);
 orb.service('mapService', mapService);
-orb.service('signinService', signinService);
-orb.service('signupService', signupService);
+orb.service('signService', signService);
 orb.service('userService', userService);
 
 //controllers register
 orb.controller('HeaderController', HeaderController);
-orb.controller('HomeController', HomeController);
+orb.controller('OrbController', OrbController);
 orb.controller('MapController', MapController);
-orb.controller('SigninController', SigninController);
-orb.controller('SignupController', SignupController);
+orb.controller('SignController', SignController);
 orb.controller('SidenavController', SidenavController);
 
 //directives register
@@ -58,6 +56,7 @@ orb.directive('orbContactList', () => new contactListDirective());
 orb.directive('orbChatPanel', () => new chatPanelDirective());
 orb.directive('orbChatBox', () => new chatBoxDirective());
 orb.directive('orbSearch', () => new searchDirective());
+orb.directive('passwordCheck', () => new passwordCheckDirective());
 
 //initialization configs
 orb.run(['$rootScope', '$window', 'OAuth', function($rootScope, $window, OAuth) {

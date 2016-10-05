@@ -1,7 +1,6 @@
 $search-font-color: #e1e8f9;
 
 header {
-	position: fixed;
 	width: 100%;
 	z-index: 1;
 
@@ -69,7 +68,7 @@ header {
 					    background-color: rgb(0,0,0);
 					    background-color: rgba(52, 1, 84, 0.9);
 					    overflow-x: hidden;
-					    overflow-y: hidden;
+					    //overflow-y: hidden;
 						transition: .5s linear all;
 
 					    &.ng-hide {

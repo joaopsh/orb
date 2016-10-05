@@ -4,9 +4,13 @@
     <div flex=" " class="banner"> <img src="/dist/images/signup-banner.png" />
       <h1>Registre-se e faça parte!</h1>
       <h3>Nossa comunidade inteira buscando e compartilhando informações de todo e qualquer lugar do mundo em tempo real.</h3></div>
-    <form flex=" ">
+    <form name="form.signUp" flex=" " novalidade=" ">
       <div layout="column" layout-align="center center">
-        <md-input-container> <label>Nome</label> <input type="text" ng-model="signup.user.firstName" class="md-block" /></md-input-container>
+        <md-input-container> <label>Nome</label> <input name="name" type="text" ng-model="signup.user.firstName" ng-required="true" class="md-block" />
+          <div ng-if="form.signUp.$submitted || form.signUp.name.$touched" ng-messages="form.signUp.name.$error">
+            <div ng-message="required">É necessário inserir seu nome.</div>
+          </div>
+        </md-input-container>
         <md-input-container> <label>Sobrenome</label> <input type="text" ng-model="signup.user.lastName" class="md-block" /></md-input-container>
         <md-input-container> <label>E-mail</label> <input type="text" ng-model="signup.user.email" class="md-block" /></md-input-container>
         <md-input-container> <label>Senha</label> <input type="password" ng-model="signup.user.password" class="md-block" /></md-input-container>

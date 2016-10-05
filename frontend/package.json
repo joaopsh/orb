@@ -8,7 +8,9 @@
   },
   "author": "",
   "license": "BSD",
-  "dependencies": {},
+  "dependencies": {
+    "particlesjs": "^1.0.1"
+  },
   "devDependencies": {
     "babel-core": "^6.10.4",
     "babel-loader": "^6.2.4",

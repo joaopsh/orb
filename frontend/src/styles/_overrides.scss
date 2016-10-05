@@ -1,6 +1,5 @@
 md-toolbar {
 	background-color: $purple;
-
 }
 
 md-toolbar:not(.md-menu-toolbar) {
@@ -8,18 +7,16 @@ md-toolbar:not(.md-menu-toolbar) {
 	border-bottom: solid 3px #D0FC05;
 }
 
+md-input-container:not(.md-input-invalid).md-input-focused .md-input {
+    border-color: $purple;
+}
 
-.md-input-focused {
+md-input-container:not(.md-input-invalid).md-input-focused label {
+    color: $purple;
+}
 
-
-	> label {
-		color: $purple !important;
-	}
-
-	> input {
-		border-color: $purple !important;
-	}
-	
+md-input-container:not(.md-input-invalid) .md-input-focused label {
+  color: $purple !important;
 }
 
 .md-button.md-default-theme.md-primary, .md-button.md-primary {
@@ -31,16 +28,20 @@ md-toolbar:not(.md-menu-toolbar) {
   height: auto;
   padding-top: 8px;
   padding-bottom: 8px;
-  white-space: normal; }
+  white-space: normal;
+}
 
 .autocompletedemoCustomTemplate .autocomplete-custom-template li:last-child {
-  border-bottom-width: 0; }
+  border-bottom-width: 0;
+}
 
 .autocompletedemoCustomTemplate .autocomplete-custom-template .item-title,
 .autocompletedemoCustomTemplate .autocomplete-custom-template .item-metadata {
   display: block;
-  line-height: 2; }
+  line-height: 2;
+}
 
 .autocompletedemoCustomTemplate .autocomplete-custom-template .item-title md-icon {
   height: 18px;
-  width: 18px; }
+  width: 18px;
+}

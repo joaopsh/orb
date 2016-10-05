@@ -61,94 +61,88 @@
 
 	var _header2 = _interopRequireDefault(_header);
 
-	var _home = __webpack_require__(4);
+	var _orb3 = __webpack_require__(4);
 
-	var _home2 = _interopRequireDefault(_home);
+	var _orb4 = _interopRequireDefault(_orb3);
 
 	var _map = __webpack_require__(5);
 
 	var _map2 = _interopRequireDefault(_map);
 
-	var _signin = __webpack_require__(6);
+	var _sign = __webpack_require__(6);
 
-	var _signin2 = _interopRequireDefault(_signin);
+	var _sign2 = _interopRequireDefault(_sign);
 
-	var _signup = __webpack_require__(7);
-
-	var _signup2 = _interopRequireDefault(_signup);
-
-	var _sidenav = __webpack_require__(8);
+	var _sidenav = __webpack_require__(7);
 
 	var _sidenav2 = _interopRequireDefault(_sidenav);
 
-	var _home3 = __webpack_require__(10);
+	var _orb5 = __webpack_require__(9);
 
-	var _home4 = _interopRequireDefault(_home3);
+	var _orb6 = _interopRequireDefault(_orb5);
 
-	var _map3 = __webpack_require__(11);
+	var _map3 = __webpack_require__(10);
 
 	var _map4 = _interopRequireDefault(_map3);
 
-	var _signin3 = __webpack_require__(12);
+	var _sign3 = __webpack_require__(11);
 
-	var _signin4 = _interopRequireDefault(_signin3);
+	var _sign4 = _interopRequireDefault(_sign3);
 
-	var _signup3 = __webpack_require__(13);
-
-	var _signup4 = _interopRequireDefault(_signup3);
-
-	var _user = __webpack_require__(14);
+	var _user = __webpack_require__(12);
 
 	var _user2 = _interopRequireDefault(_user);
 
-	var _contactListDirective = __webpack_require__(15);
+	var _contactListDirective = __webpack_require__(13);
 
 	var _contactListDirective2 = _interopRequireDefault(_contactListDirective);
 
-	var _chatPanelDirective = __webpack_require__(17);
+	var _chatPanelDirective = __webpack_require__(15);
 
 	var _chatPanelDirective2 = _interopRequireDefault(_chatPanelDirective);
 
-	var _chatBoxDirective = __webpack_require__(19);
+	var _chatBoxDirective = __webpack_require__(17);
 
 	var _chatBoxDirective2 = _interopRequireDefault(_chatBoxDirective);
 
-	var _searchDirective = __webpack_require__(21);
+	var _searchDirective = __webpack_require__(19);
 
 	var _searchDirective2 = _interopRequireDefault(_searchDirective);
+
+	var _passwordCheckDirective = __webpack_require__(21);
+
+	var _passwordCheckDirective2 = _interopRequireDefault(_passwordCheckDirective);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	//orb module
 
 
-	//directives import
-	var orb = angular.module('app.orb', ['ui.router', 'angular-oauth2', 'ngResource', 'ngMaterial', 'ngLetterAvatar', 'uiGmapgoogle-maps', 'ngAnimate', 'ngFileUpload']);
+	//controllers import
+	var orb = angular.module('app.orb', ['ui.router', 'angular-oauth2', 'ngResource', 'ngMaterial', 'ngMessages', 'ngLetterAvatar', 'uiGmapgoogle-maps', 'ngAnimate', 'ngFileUpload']);
 
 	//globals
 
 
+	//directives import
+
+
 	//services import
-
-
-	//controllers import
 	orb.constant('configs', {
 	  apiUrl: 'http://localhost:1500'
 	});
 
 	//services register
-	orb.service('homeService', _home4.default);
+	orb.service('orbService', _orb6.default);
 	orb.service('mapService', _map4.default);
-	orb.service('signinService', _signin4.default);
-	orb.service('signupService', _signup4.default);
+	orb.service('signService', _sign4.default);
 	orb.service('userService', _user2.default);
 
 	//controllers register
 	orb.controller('HeaderController', _header2.default);
-	orb.controller('HomeController', _home2.default);
+	orb.controller('OrbController', _orb4.default);
 	orb.controller('MapController', _map2.default);
-	orb.controller('SigninController', _signin2.default);
-	orb.controller('SignupController', _signup2.default);
+	orb.controller('SignController', _sign2.default);
 	orb.controller('SidenavController', _sidenav2.default);
 
 	//directives register
@@ -163,6 +157,9 @@
 	});
 	orb.directive('orbSearch', function () {
 	  return new _searchDirective2.default();
+	});
+	orb.directive('passwordCheck', function () {
+	  return new _passwordCheckDirective2.default();
 	});
 
 	//initialization configs
@@ -218,10 +215,17 @@
 	  //routes
 	  $urlRouterProvider.otherwise("/home");
 
-	  $stateProvider.state('home', {
-	    url: "/home",
-	    templateUrl: "dist/views/home/home.html",
-	    controller: "HomeController"
+	  $stateProvider.state('orb', {
+	    url: "/orb",
+	    templateUrl: "dist/views/orb.html",
+	    controller: "OrbController"
+	  }).state('sign', {
+	    url: "/sign",
+	    templateUrl: "dist/views/sign.html",
+	    controller: "SignController"
+	  }).state('about', {
+	    url: "/about",
+	    templateUrl: "dist/views/about.html"
 	  });
 	}
 
@@ -237,15 +241,30 @@
 		value: true
 	});
 
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-	var HeaderController = function HeaderController($scope, $rootScope, $mdSidenav) {
-		_classCallCheck(this, HeaderController);
+	var HeaderController = function () {
+		function HeaderController($scope, $rootScope, $mdSidenav, $state) {
+			_classCallCheck(this, HeaderController);
 
-		$rootScope.toggleSidenav = function (componentId) {
-			$mdSidenav(componentId).toggle();
-		};
-	};
+			this.$state = $state;
+
+			$rootScope.toggleSidenav = function (componentId) {
+				$mdSidenav(componentId).toggle();
+			};
+		}
+
+		_createClass(HeaderController, [{
+			key: "isState",
+			value: function isState(name) {
+				return this.$state.is(name);
+			}
+		}]);
+
+		return HeaderController;
+	}();
 
 	exports.default = HeaderController;
 
@@ -261,11 +280,11 @@
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-	var HomeController = function HomeController() {
-		_classCallCheck(this, HomeController);
+	var OrbController = function OrbController() {
+		_classCallCheck(this, OrbController);
 	};
 
-	exports.default = HomeController;
+	exports.default = OrbController;
 
 /***/ },
 /* 5 */
@@ -302,74 +321,81 @@
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-	var SigninController = function () {
-		function SigninController($resource, $cookies, configs, OAuth) {
-			_classCallCheck(this, SigninController);
+	var SignController = function () {
+		function SignController($mdToast, $resource, $cookies, $state, configs, userService, OAuth) {
+			_classCallCheck(this, SignController);
 
+			this.$cookies = $cookies;
+			this.$mdToast = $mdToast;
+			this.$state = $state;
 			this.OAuth = OAuth;
 			this.Client = $resource(configs.apiUrl + '/client/:id');
-			this.$cookies = $cookies;
+			this.userService = userService;
 		}
 
-		_createClass(SigninController, [{
-			key: 'submit',
-			value: function submit() {
+		_createClass(SignController, [{
+			key: 'signinSubmit',
+			value: function signinSubmit() {
+				var _this = this;
+
 				this.OAuth.getAccessToken({
-					username: this.user.email,
-					password: this.user.password
-				}).then(function (res) {});
+					username: this.signin.email,
+					password: this.signin.password
+				}).then(function (succ) {
+					_this.$state.go('orb');
+				}, function (err) {
+					_this.form.signin.email.$setValidity("emailPassInvalid", false);
+					_this.form.signin.password.$setValidity("emailPassInvalid", false);
+				});
+			}
+		}, {
+			key: 'signupSubmit',
+			value: function signupSubmit() {
+				var _this2 = this;
+
+				console.log(this.signup.firstName);
+				this.userService.add({
+					firstName: this.signup.firstName,
+					lastName: this.signup.lastName,
+					email: this.signup.email,
+					password: this.signup.password
+				}, function (succ) {
+					_this2.OAuth.getAccessToken({
+						username: _this2.signup.email,
+						password: _this2.signup.password
+					}).then(function (succ) {
+						_this2.$state.go('orb');
+
+						_this2.$mdToast.show(_this2.$mdToast.simple().textContent('Welcome to Orb, your account was successfully created! Enjoy yourself!').hideDelay(5000).position('top left'));
+					});
+				}, function (errs) {
+					angular.forEach(errs.data, function (err) {
+						if (err.param === 'user.firstName') _this2.form.signup.firstName.$setValidity('required', false);
+
+						if (err.param === 'user.lastName') _this2.form.signup.firstName.$setValidity('required', false);
+
+						if (err.param === 'user.email') _this2.form.signup.firstName.$setValidity('required', false);
+
+						console.log(_this2.form.signup);
+
+						if (err.param === 'user.password') _this2.form.signup.firstName.$setValidity('required', false);
+					});
+				});
+			}
+		}, {
+			key: 'setValidationErrors',
+			value: function setValidationErrors(errors) {
+				angular.forEach(errors, function (error) {});
 			}
 		}]);
 
-		return SigninController;
+		return SignController;
 	}();
 
-	exports.default = SigninController;
+	exports.default = SignController;
 
 /***/ },
 /* 7 */
-/***/ function(module, exports) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-		value: true
-	});
-
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-	var SignupController = function () {
-		function SignupController(userService, $http) {
-			_classCallCheck(this, SignupController);
-
-			this.userService = userService;
-			this.$http = $http;
-		}
-
-		_createClass(SignupController, [{
-			key: 'submit',
-			value: function submit() {
-				this.$http.get('http://localhost:1500/user').then(function (res) {
-					console.log(res.data);
-				});
-
-				// this.userService.add(this.user, function(succ) {
-
-				// }, function(err) {
-
-				// });
-			}
-		}]);
-
-		return SignupController;
-	}();
-
-	exports.default = SignupController;
-
-/***/ },
-/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -380,7 +406,7 @@
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _accountSettings = __webpack_require__(9);
+	var _accountSettings = __webpack_require__(8);
 
 	var _accountSettings2 = _interopRequireDefault(_accountSettings);
 
@@ -418,7 +444,7 @@
 	exports.default = SidenavController;
 
 /***/ },
-/* 9 */
+/* 8 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -456,7 +482,7 @@
 	exports.default = AccountSettingsController;
 
 /***/ },
-/* 10 */
+/* 9 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -474,7 +500,7 @@
 	exports.default = homeService;
 
 /***/ },
-/* 11 */
+/* 10 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -523,7 +549,7 @@
 	exports.default = mapService;
 
 /***/ },
-/* 12 */
+/* 11 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -541,25 +567,7 @@
 	exports.default = signinService;
 
 /***/ },
-/* 13 */
-/***/ function(module, exports) {
-
-	"use strict";
-
-	Object.defineProperty(exports, "__esModule", {
-		value: true
-	});
-
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-	var signupService = function signupService() {
-		_classCallCheck(this, signupService);
-	};
-
-	exports.default = signupService;
-
-/***/ },
-/* 14 */
+/* 12 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -596,7 +604,7 @@
 	exports.default = userService;
 
 /***/ },
-/* 15 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -605,7 +613,7 @@
 		value: true
 	});
 
-	var _contactList = __webpack_require__(16);
+	var _contactList = __webpack_require__(14);
 
 	var _contactList2 = _interopRequireDefault(_contactList);
 
@@ -629,7 +637,7 @@
 	exports.default = orbContactList;
 
 /***/ },
-/* 16 */
+/* 14 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -793,7 +801,7 @@
 	exports.default = ContactListController;
 
 /***/ },
-/* 17 */
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -802,7 +810,7 @@
 		value: true
 	});
 
-	var _chatPanel = __webpack_require__(18);
+	var _chatPanel = __webpack_require__(16);
 
 	var _chatPanel2 = _interopRequireDefault(_chatPanel);
 
@@ -839,7 +847,7 @@
 	exports.default = orbChatPanel;
 
 /***/ },
-/* 18 */
+/* 16 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -857,7 +865,7 @@
 	exports.default = ChatPanelDirectiveController;
 
 /***/ },
-/* 19 */
+/* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -866,7 +874,7 @@
 		value: true
 	});
 
-	var _chatBox = __webpack_require__(20);
+	var _chatBox = __webpack_require__(18);
 
 	var _chatBox2 = _interopRequireDefault(_chatBox);
 
@@ -905,7 +913,7 @@
 	exports.default = orbChatBox;
 
 /***/ },
-/* 20 */
+/* 18 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -923,7 +931,7 @@
 	exports.default = ChatBoxController;
 
 /***/ },
-/* 21 */
+/* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -932,7 +940,7 @@
 		value: true
 	});
 
-	var _search = __webpack_require__(22);
+	var _search = __webpack_require__(20);
 
 	var _search2 = _interopRequireDefault(_search);
 
@@ -956,7 +964,7 @@
 	exports.default = orbSearch;
 
 /***/ },
-/* 22 */
+/* 20 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -1048,6 +1056,35 @@
 	};
 
 	exports.default = SearchController;
+
+/***/ },
+/* 21 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var passwordCheck = function passwordCheck() {
+	  _classCallCheck(this, passwordCheck);
+
+	  this.require = 'ngModel';
+	  this.link = function (scope, elem, attrs, ctrl) {
+	    var firstPassword = '#' + attrs.passwordCheck;
+	    elem.add(firstPassword).on('keyup', function () {
+	      scope.$apply(function () {
+	        var v = elem.val() === $(firstPassword).val();
+	        ctrl.$setValidity('passwordMatch', v);
+	      });
+	    });
+	  };
+	};
+
+	exports.default = passwordCheck;
 
 /***/ }
 /******/ ]);

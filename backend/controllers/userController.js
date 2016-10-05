@@ -52,6 +52,18 @@ router.get('/:id', function(req, res) {
 });
 
 router.post('/', function(req, res) {
+    req.checkBody('user.firstName', 'Nome inválido.').notEmpty();
+    req.checkBody('user.lastName', 'Sobrenome inválido.').notEmpty();
+    req.checkBody('user.email', 'E-mail inválido.').notEmpty();
+    req.checkBody('user.password', 'Senha inválida.').notEmpty();
+
+    var errors = req.validationErrors();
+
+    if(errors) {
+      res.setHeader('Content-Type', 'application/json');
+      return res.send(errors, 400);
+    }
+
     User.findOne({ email: req.body.user.email }, function(err, foundUser) {
       if(err) {
         res.statusCode = 500;

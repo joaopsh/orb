@@ -7,11 +7,16 @@ md-toolbar:not(.md-menu-toolbar) {
   border-bottom: solid 3px #D0FC05;
 }
 
-.md-input-focused > label {
-  color: #7500B8 !important;
+md-input-container:not(.md-input-invalid).md-input-focused .md-input {
+  border-color: #7500B8;
 }
-.md-input-focused > input {
-  border-color: #7500B8 !important;
+
+md-input-container:not(.md-input-invalid).md-input-focused label {
+  color: #7500B8;
+}
+
+md-input-container:not(.md-input-invalid) .md-input-focused label {
+  color: #7500B8 !important;
 }
 
 .md-button.md-default-theme.md-primary, .md-button.md-primary {
@@ -42,7 +47,6 @@ md-toolbar:not(.md-menu-toolbar) {
 }
 
 header {
-  position: fixed;
   width: 100%;
   z-index: 1;
 }
@@ -108,7 +112,6 @@ header > .container > .menu > ul > li .overlay {
   background-color: black;
   background-color: rgba(52, 1, 84, 0.9);
   overflow-x: hidden;
-  overflow-y: hidden;
   transition: .5s linear all;
 }
 header > .container > .menu > ul > li .overlay.ng-hide {
@@ -325,7 +328,7 @@ header > .container > .logo {
 }
 
 .footer {
-  position: absolute;
+  position: fixed;
   bottom: 0;
   left: 0;
   width: 100%;
@@ -628,6 +631,100 @@ orb-contact-list {
   max-height: 436px;
 }
 
+.signin > .panel {
+  max-width: 350px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 60px;
+}
+.signin > .panel > .header {
+  color: #620798;
+  text-align: center;
+}
+.signin > .panel > .header > i {
+  font-size: 100px;
+}
+.signin > .panel > .header > h1 {
+  font-size: 42px;
+  font-weight: 600;
+  margin-top: 5px;
+}
+.signin > .panel > .header p {
+  font-weight: 400;
+  font-size: 18px;
+}
+.signin > .panel > form > md-input-container:not(.md-input-invalid) label {
+  font-weight: 600;
+  color: rgba(98, 7, 152, 0.8);
+}
+.signin > .panel > form > md-input-container:not(.md-input-invalid) .md-input {
+  border-color: rgba(98, 7, 152, 0.8);
+  color: #7500b8;
+}
+.signin > .panel > form > md-input-container {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+.signin > .panel button {
+  background-color: #D0FC05;
+}
+.signin > .panel button span {
+  color: #7500B8;
+}
+
+.signup > .panel {
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 60px;
+}
+.signup > .panel > .header {
+  color: #620798;
+  text-align: center;
+}
+.signup > .panel > .header > p {
+  font-weight: 400;
+  padding-left: 45px;
+  font-size: 20px;
+}
+.signup > .panel > .divider {
+  margin-top: 30px;
+  margin-bottom: 15px;
+}
+.signup > .panel > form md-input-container:not(.md-input-invalid) label {
+  font-weight: 600;
+  color: rgba(98, 7, 152, 0.8);
+}
+.signup > .panel > form md-input-container:not(.md-input-invalid) .md-input {
+  border-color: rgba(98, 7, 152, 0.8);
+  color: #7500b8;
+}
+.signup > .panel > form md-input-container:not(.md-input-invalid) > md-input-container {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+.signup > .panel button {
+  background-color: #7500B8;
+}
+.signup > .panel button span {
+  color: white;
+}
+.signup > .panel button:hover span {
+  color: #7500B8;
+}
+
+.title {
+  margin-left: auto;
+  margin-right: auto;
+  color: #620798;
+  padding-left: 10%;
+  padding-right: 10%;
+  border-bottom: solid 4px #e5e2ea;
+}
+.title > h1 {
+  font-weight: 600;
+}
+
 .angular-google-map-container {
   height: 100vh;
 }
@@ -644,4 +741,7 @@ html body {
   margin: 0;
   padding: 0;
   font-weight: 300;
+}
+html body .fixed {
+  position: fixed;
 }

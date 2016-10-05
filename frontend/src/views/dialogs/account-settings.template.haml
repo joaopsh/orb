@@ -4,43 +4,43 @@
       .md-toolbar-tools
         %md-button.md-icon-button
           %md-icon person
-        %h2 Minha Conta
+        %h2 My Account
         %span{flex: " "}
         %md-button.md-icon-button{ 'ng-click': 'accountSettings.cancel()' }
           %md-icon{ 'aria-label': 'Close dialog' } close
     %md-dialog-content
       .md-dialog-content.account-settings
-        %h4 Dados Gerais
+        %h4 General
         %div{ layout: 'row' }
           %md-input-container
-            %label Nome
+            %label First Name
             %input{ 'nd-model': '' }
           %md-input-container
-            %label Sobrenome
+            %label Last Name
             %input{ 'nd-model': '' }
-        %h4 Alterar E-mail
+        %h4 Change E-mail
         %div{ layout: 'row' }
           %md-input-container
             %label E-mail
             %input{ 'nd-model': '' }
           %md-input-container
-            %label Confirmação
+            %label Confirm E-mail
             %input{ 'nd-model': '' }
         %div.image-upload{ layout: 'row' }
           %img{ 'ngf-thumbnail': 'accountSettings.file || \'http://cdn-9chat-fun.9cache.com/static/dist/web2/images/avatar-default.png\'' }
           %md-input-container.md-block
-            %label{ 'ng-bind': 'accountSettings.file.name || \'Carregue sua imagem...\' ' }
+            %label{ 'ng-bind': 'accountSettings.file.name || \'Load your image...\' ' }
             %input{ 'nd-model': '', disabled: 'disabled' }
-          %md-button.md-primary{ 'ngf-select': 'accountSettings.imageUpload($file, $invalidFiles)', type: 'file', accept: 'image/*' } Carregar
-        %h4 Alterar Senha
+          %md-button.md-primary{ 'ngf-select': 'accountSettings.imageUpload($file, $invalidFiles)', type: 'file', accept: 'image/*' } Load
+        %h4 Change Password
         %div{ layout: 'row' }
           %md-input-container
-            %label Nova Senha
+            %label Password
             %input{ 'nd-model': '', type: 'password' }
           %md-input-container
-            %label Confirmação
+            %label Confirm Password
             %input{ 'nd-model': '', type: 'password' }
         %div{ layout: 'row' }
     %md-dialog-actions{layout: "row"}
       %md-button.md-primary{"ng-click": "accountSettings.save()"}
-        Salvar
+        Save

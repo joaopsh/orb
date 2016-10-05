@@ -1,20 +1,14 @@
-<header ng-controller="HeaderController as header">
-  <div class="container">
-    <div layout="row" layout-align="start center" class="brand"> <i flex="nogrow" ng-click="$root.toggleSidenav(&quot;left-sidenav&quot;)" class="material-icons">menu</i> <img src="/dist/images/brand.png" flex="noshrink" /></div>
-    <nav class="menu">
-      <ul>
-        <li> <a href="javascript:void(0)" ng-click="menu = 1">Entrar</a>
-          <ng-include src="'/dist/views/partials/_signin.html'"></ng-include>
-        </li>
-        <li> <a href="javascript:void(0)" ng-click="menu = 2">Registrar-se</a>
-          <ng-include src="'/dist/views/partials/_signup.html'"></ng-include>
-        </li>
-        <li> <a href="javascript:void(0)" ng-click="menu = 3">Sobre</a>
-          <ng-include src="'/dist/views/partials/_about.html'"></ng-include>
-        </li>
-      </ul>
-    </nav>
-    <div class="logo"> <img src="/dist/images/logo.png" /></div>
-    <div class="search"> <input type="text" placeholder="Buscar Orbs!" /> <i class="material-icons">search</i></div>
-  </div>
-</header>
+<div ng-controller="HeaderController as header">
+  <header ng-class="{ fixed: header.isState('orb') }">
+    <div class="container">
+      <div layout="row" layout-align="start center" class="brand"> <i flex="nogrow" ng-click="$root.toggleSidenav(&quot;left-sidenav&quot;)" class="material-icons">menu</i> <img src="/dist/images/brand.png" flex="noshrink" /></div>
+      <nav class="menu">
+        <ul>
+          <li> <a href="javascript:void(0)" ui-sref="orb">Orb</a></li>
+          <li> <a href="javascript:void(0)" ui-sref="sign">Sign</a></li>
+          <li> <a href="javascript:void(0)" ui-sref="about">About</a></li>
+        </ul>
+      </nav>
+      <div class="search"> <input type="text" placeholder="Buscar Orbs!" /> <i class="material-icons">search</i></div>
+    </div>
+</div>
