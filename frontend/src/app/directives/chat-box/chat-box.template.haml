@@ -27,6 +27,6 @@
     .message-control
       .emojis{ layout: 'row', 'layout-align': 'center center' }
         %i.material-icons insert_emoticon
-      %input{ type: "text" }
+      %input{ type: "text", 'ng-model': 'message', id: 'message-input', 'ng-keyup': '$event.keyCode == 13 && send()' }
       .send{ layout: 'row', 'layout-align': 'center center' }
-        %i.material-icons{ 'ng-click': 'panelMinimize()'} send
+        %i.material-icons{ 'ng-click': 'send()' } send

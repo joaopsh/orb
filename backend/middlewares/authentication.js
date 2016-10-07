@@ -56,8 +56,7 @@ passport.use("clientPassword", new ClientPasswordStrategy(
 
 passport.use("accessToken", new BearerStrategy(
     function (accessToken, done) {
-
-        var accessTokenHash = crypto.createHash('sha1').update(accessToken).digest('hex')
+        var accessTokenHash = crypto.createHash('sha1').update(accessToken).digest('hex');
         
         AccessToken.findOne({ token: accessTokenHash }, function (err, token) {
             if (err) return done(err);

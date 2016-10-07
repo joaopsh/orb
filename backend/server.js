@@ -1,11 +1,10 @@
-var express = require('express');
-var app = module.exports = express();
-var http = require('http').Server(app);
-var io = require('socket.io')(http);
-
-var mongoose = require('mongoose')
+var config = require('./config.json')
+	, express = require('express')
+	, app = module.exports = express()
+	, io = require('socket.io')(config.app.socketPort)
+	, chatSocketHandler = require('./domain/chatSocketHandler')(io)
+	, mongoose = require('mongoose')
 	, bodyParser = require('body-parser')
-	, config = require('./config.json')
 	, passport = require('passport')
 	, expressValidator = require('express-validator')
 	, authentication = require('./middlewares/authentication')
@@ -13,7 +12,8 @@ var mongoose = require('mongoose')
 
 //controllers import
 var userController = require('./controllers/userController')
-	, clientController = require('./controllers/clientController');
+	, clientController = require('./controllers/clientController')
+	, tokenController = require('./controllers/tokenController');
 
 mongoose.connect(config.mongodb);
 
@@ -35,12 +35,12 @@ app.use(function(req, res, next) {
 
 });
 
-app.post('/oauth/token', oauth.token)
-
 //routes register
+app.post('/oauth/token', oauth.token);
+app.use('/oauth', passport.authenticate('accessToken', { session: false }), tokenController);
 app.use('/user', userController);
 app.use('/client', passport.authenticate('accessToken', { session: false }), clientController);
 
-http.listen(1500, function(){
-  console.log('Orb Server running on PORT 1500!');
+app.listen(config.app.apiPort, function(){
+  console.log('Orb Server running on PORT ' + config.app.apiPort);
 });

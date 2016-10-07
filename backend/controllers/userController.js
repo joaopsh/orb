@@ -26,10 +26,8 @@ router.get('/', function(req, res) {
 
 router.get('/:id', function(req, res) {
   User.findOne({ _id: req.params.id }, '-password -__v', function(err, user) {
-    if(err) {
-        res.statusCode = 500;
-        return res.json({ status: 'ERROR', message: 'Internal Server Error.'});
-    }
+    if(err)
+        return res.status(500).json({ status: 'ERROR', message: 'Internal Server Error.'});
 
     if(user) {
       return res.json({
@@ -43,8 +41,7 @@ router.get('/:id', function(req, res) {
       });
 
     } else {
-      res.statusCode = 400;
-      res.json({ status: 'ERROR', message: 'User does not exist.' });
+      res.status(400).json({ status: 'ERROR', message: 'User does not exist.' });
     }
 
   });
@@ -52,27 +49,23 @@ router.get('/:id', function(req, res) {
 });
 
 router.post('/', function(req, res) {
-    req.checkBody('user.firstName', 'Nome inválido.').notEmpty();
-    req.checkBody('user.lastName', 'Sobrenome inválido.').notEmpty();
-    req.checkBody('user.email', 'E-mail inválido.').notEmpty();
-    req.checkBody('user.password', 'Senha inválida.').notEmpty();
+    req.checkBody('user.firstName', 'First name is required.').notEmpty();
+    req.checkBody('user.lastName', 'Last name is required.').notEmpty();
+    req.checkBody('user.email', 'E-mail is required.').notEmpty();
+    req.checkBody('user.password', 'Password is required.').notEmpty();
 
     var errors = req.validationErrors();
 
-    if(errors) {
-      res.setHeader('Content-Type', 'application/json');
-      return res.send(errors, 400);
-    }
-
+    if(errors)
+      return res.status(400).json(errors);
+    
     User.findOne({ email: req.body.user.email }, function(err, foundUser) {
       if(err) {
-        res.statusCode = 500;
-        return res.json({ status: 'ERROR', message: 'Internal Server Error.'});
+        return res.status(500).json({ status: 'ERROR', message: 'Internal Server Error.'});
       }
 
       if(foundUser) {
-        res.statusCode = 400;
-        res.json({ status: 'ERROR', message: 'User already exists.' });
+        res.status(400).json({ status: 'ERROR', message: 'User already exists.' });
 
       } else {
 
@@ -85,17 +78,13 @@ router.post('/', function(req, res) {
 
         user.save(function(err) {
           if(err) {
-            if(err.name == 'ValidationError') {
-              res.statusCode = 400;
-              return res.json({ status: 'ERROR', message: 'Validation Error.'});
-            }
-
-            res.statusCode = 500;
-            return res.json({ status: 'ERROR', message: 'Internal Server Error.'});
+            if(err.name == 'ValidationError')
+              return res.status(400).json({ status: 'ERROR', message: 'Validation Error.'});
+            
+            return res.status(500).json({ status: 'ERROR', message: 'Internal Server Error.'});
           }
           else {
-            res.statusCode = 200;
-            return res.json({ 
+            return res.status(200).json({ 
                 status: 'OK', 
                 user: {
                   id: user._id,
@@ -104,10 +93,14 @@ router.post('/', function(req, res) {
                   email: user.email
                 }
             });
+
           }
+
         });
+
       }
+
     });
 });
 
- module.exports = router;
+module.exports = router;

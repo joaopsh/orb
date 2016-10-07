@@ -7,6 +7,7 @@ function orbConfig(
 , OAuthProvider
 , OAuthTokenProvider
 , uiGmapGoogleMapApiProvider) {
+  //$locationProvider.html5Mode(true);
   
   OAuthTokenProvider.configure({
     name: 'orbAuth',
@@ -28,16 +29,22 @@ function orbConfig(
     });
 
   //routes
-  $urlRouterProvider.otherwise("/home");
+  $urlRouterProvider.otherwise("/sign");
 
   $stateProvider
   .state('orb', {
     url: "/orb",
+    resolve: {
+      Auth: Authenticated
+    },
     templateUrl: "dist/views/orb.html",
     controller: "OrbController"
   })
   .state('sign', {
     url: "/sign",
+    resolve: {
+      Auth: skipIfAuthenticated
+    },
     templateUrl: "dist/views/sign.html",
     controller: "SignController"
   })
@@ -45,7 +52,38 @@ function orbConfig(
     url: "/about",
     templateUrl: "dist/views/about.html",
   });
-  
+}
+
+//routes helper
+var skipIfAuthenticated = function ($q, OAuth) {
+  var defer = $q.defer();
+
+  if(OAuth.isAuthenticated()) {
+    defer.reject();
+
+  } else {
+    defer.resolve();
+
+  }
+
+  return defer.promise;
+}
+
+var Authenticated = function ($q, $state, OAuth) {
+  var defer = $q.defer();
+
+  if(OAuth.isAuthenticated()) {
+    defer.resolve();
+
+  } else {
+    $timeout(function () {
+      $state.go('sign');
+    });
+    
+    defer.reject();
+  }
+
+  return defer.promise;
 }
 
 export default orbConfig;

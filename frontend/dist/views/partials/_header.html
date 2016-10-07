@@ -1,11 +1,12 @@
 <div ng-controller="HeaderController as header">
   <header ng-class="{ fixed: header.isState('orb') }">
     <div class="container">
-      <div layout="row" layout-align="start center" class="brand"> <i flex="nogrow" ng-click="$root.toggleSidenav(&quot;left-sidenav&quot;)" class="material-icons">menu</i> <img src="/dist/images/brand.png" flex="noshrink" /></div>
+      <div layout="row" layout-align="start center" class="brand"> <i flex="nogrow" ng-click="$root.toggleSidenav(&quot;left-sidenav&quot;)" ng-if="header.isAuthenticated()" class="material-icons">menu</i> <img src="/dist/images/brand.png" flex="noshrink" /></div>
       <nav class="menu">
         <ul>
-          <li> <a href="javascript:void(0)" ui-sref="orb">Orb</a></li>
-          <li> <a href="javascript:void(0)" ui-sref="sign">Sign</a></li>
+          <li ng-if="header.isAuthenticated()"> <a href="javascript:void(0)" ui-sref="orb">Orb</a></li>
+          <li ng-if="!header.isAuthenticated()"> <a href="javascript:void(0)" ui-sref="sign">Sign</a></li>
+          <li ng-if="header.isAuthenticated()"> <a href="javascript:void(0)" ng-click="header.logout()">Logout</a></li>
           <li> <a href="javascript:void(0)" ui-sref="about">About</a></li>
         </ul>
       </nav>

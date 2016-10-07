@@ -1,6 +1,10 @@
 {
 
   "mongodb": "mongodb://localhost/orb",
-  "allowedOrigins": ["http://localhost:3000"]
+  "allowedOrigins": ["http://localhost:3000"],
+  "app": {
+    "apiPort": "1500",
+    "socketPort": "1200"
+  }
 
 }

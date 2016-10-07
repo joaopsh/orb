@@ -19,8 +19,8 @@
       <div class="other"><strong>21:42: </strong>Mas muito obrigado pela informação!</div>
     </div>
     <div class="message-control">
-      <div layout="row" layout-align="center center" class="emojis"> <i class="material-icons">insert_emoticon</i></div> <input type="text" />
-      <div layout="row" layout-align="center center" class="send"> <i ng-click="panelMinimize()" class="material-icons">send</i></div>
+      <div layout="row" layout-align="center center" class="emojis"> <i class="material-icons">insert_emoticon</i></div> <input type="text" ng-model="message" id="message-input" ng-keyup="$event.keyCode == 13 &amp;&amp; send()" />
+      <div layout="row" layout-align="center center" class="send"> <i ng-click="send()" class="material-icons">send</i></div>
     </div>
   </div>
 </div>

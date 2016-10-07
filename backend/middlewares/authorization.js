@@ -30,8 +30,8 @@ server.exchange(oauth2orize.exchange.password(function (client, email, password,
             var newAccessTokenHash = crypto.createHash('sha1').update(newAccesstoken).digest('hex');
             var newRefreshTokenHash = crypto.createHash('sha1').update(newRefreshToken).digest('hex');
             
-            // 15 minutes token
-            var expirationDate = new Date(new Date().getTime() + (1000 * 10));
+            // 5 minutes token
+            var expirationDate = new Date(new Date().getTime() + (1000 * 60 * 5));
             
             var accessToken = new AccessToken();
 
@@ -63,7 +63,7 @@ server.exchange(oauth2orize.exchange.password(function (client, email, password,
                 refreshToken.save(function(err) {
                     if (err)
                         return done(err);
-
+                    
                     done(null, newAccesstoken, newRefreshToken, { expires_in: expirationDate });
                 });
             });
@@ -91,8 +91,8 @@ server.exchange(oauth2orize.exchange.refreshToken(function (client, refreshToken
         var newAccessTokenHash = crypto.createHash('sha1').update(newAccesstoken).digest('hex');
         var newRefreshTokenHash = crypto.createHash('sha1').update(newRefreshToken).digest('hex');
         
-        // 15 minutes token
-        var expirationDate = new Date(new Date().getTime() + (1000 * 10));
+        // 5 minutes token
+        var expirationDate = new Date(new Date().getTime() + (1000 * 60 * 5));
         
         var accessToken = new AccessToken();
 
@@ -125,6 +125,7 @@ server.exchange(oauth2orize.exchange.refreshToken(function (client, refreshToken
                 if (err)
                     return done(err);
 
+                
                 done(null, newAccesstoken, newRefreshToken, { expires_in: expirationDate });
             });
         });

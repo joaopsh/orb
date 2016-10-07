@@ -85,13 +85,13 @@
 
 	var _map4 = _interopRequireDefault(_map3);
 
-	var _sign3 = __webpack_require__(11);
-
-	var _sign4 = _interopRequireDefault(_sign3);
-
-	var _user = __webpack_require__(12);
+	var _user = __webpack_require__(11);
 
 	var _user2 = _interopRequireDefault(_user);
+
+	var _chatSocket = __webpack_require__(12);
+
+	var _chatSocket2 = _interopRequireDefault(_chatSocket);
 
 	var _contactListDirective = __webpack_require__(13);
 
@@ -129,14 +129,15 @@
 
 	//services import
 	orb.constant('configs', {
-	  apiUrl: 'http://localhost:1500'
+	  apiUrl: 'http://localhost:1200',
+	  chatNamespace: '/chat'
 	});
 
 	//services register
 	orb.service('orbService', _orb6.default);
 	orb.service('mapService', _map4.default);
-	orb.service('signService', _sign4.default);
 	orb.service('userService', _user2.default);
+	orb.service('chatSocketService', _chatSocket2.default);
 
 	//controllers register
 	orb.controller('HeaderController', _header2.default);
@@ -152,9 +153,9 @@
 	orb.directive('orbChatPanel', function () {
 	  return new _chatPanelDirective2.default();
 	});
-	orb.directive('orbChatBox', function () {
-	  return new _chatBoxDirective2.default();
-	});
+	orb.directive('orbChatBox', ["chatSocketService", function (chatSocketService) {
+	  return new _chatBoxDirective2.default(chatSocketService);
+	}]);
 	orb.directive('orbSearch', function () {
 	  return new _searchDirective2.default();
 	});
@@ -163,7 +164,7 @@
 	});
 
 	//initialization configs
-	orb.run(['$rootScope', '$window', 'OAuth', function ($rootScope, $window, OAuth) {
+	orb.run(['$rootScope', '$window', '$state', 'OAuth', function ($rootScope, $window, $state, OAuth) {
 	  $rootScope.$on('oauth:error', function (event, rejection) {
 	    if (rejection.headers('WWW-Authenticate') && rejection.headers('WWW-Authenticate').indexOf('invalid_grant') > -1) {
 	      return;
@@ -173,7 +174,7 @@
 	      return OAuth.getRefreshToken();
 	    }
 
-	    return $window.location.href = '/login?error_reason=' + rejection.data.error;
+	    return $state.go('sign');
 	  });
 	}]);
 
@@ -192,6 +193,7 @@
 	  value: true
 	});
 	function orbConfig($locationProvider, $stateProvider, $urlRouterProvider, $mdThemingProvider, $httpProvider, OAuthProvider, OAuthTokenProvider, uiGmapGoogleMapApiProvider) {
+	  //$locationProvider.html5Mode(true);
 
 	  OAuthTokenProvider.configure({
 	    name: 'orbAuth',
@@ -213,14 +215,20 @@
 	  });
 
 	  //routes
-	  $urlRouterProvider.otherwise("/home");
+	  $urlRouterProvider.otherwise("/sign");
 
 	  $stateProvider.state('orb', {
 	    url: "/orb",
+	    resolve: {
+	      Auth: Authenticated
+	    },
 	    templateUrl: "dist/views/orb.html",
 	    controller: "OrbController"
 	  }).state('sign', {
 	    url: "/sign",
+	    resolve: {
+	      Auth: skipIfAuthenticated
+	    },
 	    templateUrl: "dist/views/sign.html",
 	    controller: "SignController"
 	  }).state('about', {
@@ -229,13 +237,42 @@
 	  });
 	}
 
+	//routes helper
+	var skipIfAuthenticated = function skipIfAuthenticated($q, OAuth) {
+	  var defer = $q.defer();
+
+	  if (OAuth.isAuthenticated()) {
+	    defer.reject();
+	  } else {
+	    defer.resolve();
+	  }
+
+	  return defer.promise;
+	};
+
+	var Authenticated = function Authenticated($q, $state, OAuth) {
+	  var defer = $q.defer();
+
+	  if (OAuth.isAuthenticated()) {
+	    defer.resolve();
+	  } else {
+	    $timeout(function () {
+	      $state.go('sign');
+	    });
+
+	    defer.reject();
+	  }
+
+	  return defer.promise;
+	};
+
 	exports.default = orbConfig;
 
 /***/ },
 /* 3 */
 /***/ function(module, exports) {
 
-	"use strict";
+	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
 		value: true
@@ -246,10 +283,12 @@
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	var HeaderController = function () {
-		function HeaderController($scope, $rootScope, $mdSidenav, $state) {
+		function HeaderController($scope, $rootScope, $mdSidenav, $state, OAuth, OAuthToken) {
 			_classCallCheck(this, HeaderController);
 
 			this.$state = $state;
+			this.OAuth = OAuth;
+			this.OAuthToken = OAuthToken;
 
 			$rootScope.toggleSidenav = function (componentId) {
 				$mdSidenav(componentId).toggle();
@@ -257,9 +296,23 @@
 		}
 
 		_createClass(HeaderController, [{
-			key: "isState",
+			key: 'isState',
 			value: function isState(name) {
 				return this.$state.is(name);
+			}
+		}, {
+			key: 'isAuthenticated',
+			value: function isAuthenticated() {
+				return this.OAuth.isAuthenticated();
+			}
+		}, {
+			key: 'logout',
+			value: function logout() {
+				var _this = this;
+
+				this.OAuth.revokeToken().then(function () {
+					_this.$state.go('sign');
+				});
 			}
 		}]);
 
@@ -552,24 +605,6 @@
 /* 11 */
 /***/ function(module, exports) {
 
-	"use strict";
-
-	Object.defineProperty(exports, "__esModule", {
-		value: true
-	});
-
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-	var signinService = function signinService() {
-		_classCallCheck(this, signinService);
-	};
-
-	exports.default = signinService;
-
-/***/ },
-/* 12 */
-/***/ function(module, exports) {
-
 	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
@@ -602,6 +637,86 @@
 	}();
 
 	exports.default = userService;
+
+/***/ },
+/* 12 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var chatSocketService = function () {
+	  function chatSocketService($rootScope, $state, configs, OAuth, OAuthToken) {
+	    var _this = this;
+
+	    _classCallCheck(this, chatSocketService);
+
+	    this.$rootScope = $rootScope;
+	    this.tryRefresh = true;
+	    this.socket = io.connect(configs.apiUrl + configs.chatNamespace);
+
+	    this.socket.on('connect', function () {
+
+	      _this.socket.emit('authentication', {
+	        auth: OAuthToken.getToken()
+	      });
+
+	      _this.socket.on('authenticated', function () {
+	        console.log('socket::authenticated');
+	      });
+
+	      _this.socket.on('unauthorized', function (err) {
+	        if (_this.tryRefresh) {
+	          OAuth.getRefreshToken().then(function () {
+	            console.log('socket::refreshed');
+	            _this.socket.emit('authentication', { auth: OAuthToken.getToken() });
+	          });
+
+	          tryRefresh = false;
+	        }
+	      });
+	    });
+	  }
+
+	  _createClass(chatSocketService, [{
+	    key: 'on',
+	    value: function on(eventName, callback) {
+	      var self = this;
+
+	      this.socket.on(eventName, function () {
+	        var args = arguments;
+	        self.$rootScope.$apply(function () {
+	          callback.apply(self.socket, args);
+	        });
+	      });
+	    }
+	  }, {
+	    key: 'emit',
+	    value: function emit(eventName, data, callback) {
+	      var self = this;
+
+	      this.socket.emit(eventName, data, function () {
+	        var args = arguments;
+	        self.$rootScope.$apply(function () {
+	          if (callback) {
+	            callback.apply(self.socket, args);
+	          }
+	        });
+	      });
+	    }
+	  }]);
+
+	  return chatSocketService;
+	}();
+
+	exports.default = chatSocketService;
 
 /***/ },
 /* 13 */
@@ -882,31 +997,34 @@
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-	var orbChatBox = function orbChatBox() {
+	var orbChatBox = function orbChatBox(chatSocketService) {
 		_classCallCheck(this, orbChatBox);
 
 		this.scope = {
 			panelMinimize: '&'
-
 		};
 		this.restrict = 'E';
 		this.templateUrl = '/dist/views/templates/chat-box/chat-box.template.html';
-		this.controller = function () {
-			return new _chatBox2.default();
-		};
+		this.controller = _chatBox2.default;
 		this.controllerAs = 'chatBox';
 		this.link = function (scope, elem, attr) {
-
 			scope.close = function (event) {
 				event.stopPropagation();
-
-				console.log('close fired!');
 			};
 
 			scope.favorite = function (event) {
 				event.stopPropagation();
-				console.log('favorite fired!');
 			};
+
+			scope.send = function () {
+				chatSocketService.emit('myfront', scope.message);
+				scope.message = '';
+				elem[0].querySelector('#message-input').focus();
+			};
+
+			chatSocketService.on('tweet', function (tweet) {
+				console.log(tweet);
+			});
 		};
 	};
 
