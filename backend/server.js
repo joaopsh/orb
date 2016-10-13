@@ -1,7 +1,7 @@
 var config = require('./config.json')
 	, express = require('express')
 	, app = module.exports = express()
-	, io = require('socket.io')(config.app.socketPort)
+	, io = require('socket.io')(config.app.socketioPort)
 	, chatSocketHandler = require('./domain/chatSocketHandler')(io)
 	, mongoose = require('mongoose')
 	, bodyParser = require('body-parser')

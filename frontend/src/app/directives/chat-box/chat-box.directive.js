@@ -3,13 +3,16 @@ import { default as Controller } from './chat-box.controller'
 class orbChatBox {
 	constructor(chatSocketService) {
 		this.scope = {
-			panelMinimize:'&'
+			panelMinimize:'&',
+			roomUid:'@',
+			user:'='
 		};
 		this.restrict = 'E';
 		this.templateUrl =  '/dist/views/templates/chat-box/chat-box.template.html';
 		this.controller = Controller;
 		this.controllerAs = 'chatBox';
-		this.link = function(scope, elem, attr) {
+		this.link = (scope, elem, attr) => {
+
 			scope.close = (event) => {
 				event.stopPropagation();
 			}
@@ -19,14 +22,18 @@ class orbChatBox {
 			};
 
 			scope.send = () => {
-				chatSocketService.emit('myfront', scope.message);
+				var date = new Date;
+				var hours = date.getHours().toString().length === 1 ? '0' + date.getHours() : date.getHours();
+				var minutes = date.getMinutes().toString().length === 1 ? '0' + date.getMinutes() : date.getMinutes();
+
+				elem.find('.messages-box').append('<div class="me"><strong>'+ hours + ':' + minutes + ': </strong>'+ scope.message +'</div>');
+				chatSocketService.emit('message:send', {
+					roomUid: scope.roomUid,
+					text: scope.message
+				});
 				scope.message = '';
 				elem[0].querySelector('#message-input').focus();
 			}
-
-			chatSocketService.on('tweet', function(tweet) {
-				console.log(tweet);
-			});
 
 		};
 		

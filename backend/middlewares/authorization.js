@@ -31,7 +31,7 @@ server.exchange(oauth2orize.exchange.password(function (client, email, password,
             var newRefreshTokenHash = crypto.createHash('sha1').update(newRefreshToken).digest('hex');
             
             // 5 minutes token
-            var expirationDate = new Date(new Date().getTime() + (1000 * 60 * 5));
+            var expirationDate = new Date(new Date().getTime() + (1000 * 60 * 120));
             
             var accessToken = new AccessToken();
 
@@ -92,7 +92,7 @@ server.exchange(oauth2orize.exchange.refreshToken(function (client, refreshToken
         var newRefreshTokenHash = crypto.createHash('sha1').update(newRefreshToken).digest('hex');
         
         // 5 minutes token
-        var expirationDate = new Date(new Date().getTime() + (1000 * 60 * 5));
+        var expirationDate = new Date(new Date().getTime() + (1000 * 60 * 120));
         
         var accessToken = new AccessToken();
 

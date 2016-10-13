@@ -1,33 +1,79 @@
 class chatSocketService {
-  constructor($rootScope, $state, configs, OAuth, OAuthToken) {
+  constructor($rootScope, $state, $mdToast, configs, OAuth, OAuthToken) {
     this.$rootScope = $rootScope;
     this.tryRefresh = true;
-    this.socket = io.connect(configs.apiUrl + configs.chatNamespace);
+    this.ready = false;
+    
+    this.socket = io.connect(configs.socketioUrl + configs.chatNamespace, { 'force new connection': true, reconnection: true });
 
-    this.socket.on('connect', () => {
-      
-      this.socket.emit('authentication', { 
-        auth: OAuthToken.getToken()
-      });
-      
-      this.socket.on('authenticated', () => {
-        console.log('socket::authenticated');
-      });
+    this.socket.on('connect', () => {;
+      if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition((position) => {
 
-      this.socket.on('unauthorized', (err) => {
-        if(this.tryRefresh) {
-          OAuth.getRefreshToken().then(() => {
-            console.log('socket::refreshed');
-            this.socket.emit('authentication', { auth: OAuthToken.getToken() });
+          this.socket.emit('authentication', { 
+            auth: OAuthToken.getToken(),
+            coords: {
+              latitude: position.coords.latitude,
+              longitude: position.coords.longitude
+            }
+          });
+          
+          this.socket.on('authenticated', () => {
+            console.log('socket::authenticated');
           });
 
-          tryRefresh = false;
-        }
-        
-      });
+          this.socket.on('disconnect', () => {
+            this.ready = false;
+            this.tryRefresh = true;
+            console.log('socket::disconnected');
+          });
+
+          this.socket.on('ready', () => {
+            this.ready = true;
+            console.log('socket::ready');
+          });
+
+          this.socket.on('unauthorized', (err) => {
+            if(this.tryRefresh) {
+              OAuth.getRefreshToken().then(() => {
+                this.socket = io.connect(configs.socketioUrl + configs.chatNamespace, { 'force new connection': true, reconnection: true });
+                this.socket.emit('authentication', { 
+                  auth: OAuthToken.getToken(),
+                  coords: {
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude
+                  }
+                });
+
+                console.log('socket::refreshed');
+              });
+
+              this.tryRefresh = false;
+            }
+            
+          });
+
+        });
+
+      } else {
+        $mdToast.show(this.$mdToast.simple()
+				.textContent('Sorry, Orb will not work. Your browser doesn\'t support geolocation, please, update It.')
+				.hideDelay(1000 * 15)
+				.position('top left'));
+      }
 
     });
 
+  }
+
+  disconnect() {
+    this.socket.disconnect();
+    this.tryRefresh = true;
+    this.ready = false;
+  }
+
+  isReady() {
+    return this.ready;
   }
 
   on (eventName, callback) {

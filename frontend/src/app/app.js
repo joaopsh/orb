@@ -33,10 +33,12 @@ var orb = angular.module('app.orb', [
 , 'ngFileUpload'
 ]);
 
-//globals
+//global consts
 orb.constant('configs', {
-	apiUrl: 'http://localhost:1200',
-  chatNamespace: '/chat'
+	apiUrl: 'http://localhost:1500',
+  socketioUrl: 'http://localhost:1200',
+  chatNamespace: '/chat',
+  mapNamespace: '/map'
 });
 
 //services register

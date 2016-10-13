@@ -1,5 +1,5 @@
 <section class="chat-panel">
   <div class="container">
-    <orb-chat-box panel-minimize="minimize()"></orb-chat-box>
+    <orb-chat-box ng-repeat="chat in chats" panel-minimize="minimize()" room-uid="chat.roomId" user="chat.user"></orb-chat-box>
   </div>
 </section>

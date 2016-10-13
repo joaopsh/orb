@@ -2,4 +2,5 @@
   .container{ 'ng-controller': 'OrbController as orb' }
     %div{ 'ng-controller': 'MapController as map' }
       %ui-gmap-google-map{ center: 'map.default.center', zoom: 'map.default.zoom', options: 'map.options' }
+        != "<ui-gmap-marker ng-repeat=\"marker in map.markers\" idkey=\"marker.email\" coords=\"marker.coords\" icon=\"{ url: '/dist/images/pin.png' }\">"
 %orb-chat-panel

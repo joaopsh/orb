@@ -14,6 +14,7 @@ class SignController {
 			username: this.signin.email,
 			password: this.signin.password
 		}).then((succ) => {
+			
 			this.$state.go('orb');
 		}, (err) => {
 			this.form.signin.email.$setValidity("emailPassInvalid", false);
@@ -22,7 +23,6 @@ class SignController {
 	}
 
 	signupSubmit() {
-		console.log(this.signup.firstName);
 		this.userService.add({
 			firstName: this.signup.firstName,
 			lastName: this.signup.lastName,
@@ -52,8 +52,6 @@ class SignController {
 
 				if(err.param === 'user.email')
 					this.form.signup.firstName.$setValidity('required', false);
-
-				console.log(this.form.signup);
 
 				if(err.param === 'user.password')
 					this.form.signup.firstName.$setValidity('required', false);

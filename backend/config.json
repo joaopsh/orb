@@ -4,7 +4,11 @@
   "allowedOrigins": ["http://localhost:3000"],
   "app": {
     "apiPort": "1500",
-    "socketPort": "1200"
+    "socketioPort": "1200"
+  },
+  "redis": {
+    "host": "127.0.0.1",
+    "port": "6379"
   }
 
 }

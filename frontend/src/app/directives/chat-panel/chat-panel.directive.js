@@ -9,7 +9,6 @@ class orbChatPanel {
 		this.controller = () => new Controller();
 		this.controllerAs = 'chatPanel';
 		this.link = function(scope, elem, attr) {
-			
 			scope.minimizeToggle = true;
 
 			scope.minimize = () => {
@@ -21,6 +20,24 @@ class orbChatPanel {
 					scope.minimizeToggle = !scope.minimizeToggle;
 				}
 			}
+
+			scope.chats = [{
+				roomId: 'a1as5as4a5',
+				user: {
+					firstName: 'Maria',
+					lastName: 'Silva',
+					email: 'msilva@live.com'
+				}
+			},
+			{
+				roomId: 'defe8f7ef',
+				user: {
+					firstName: 'Romarilda',
+					lastName: 'Zenato',
+					email: 'romailda@live.com'
+				}
+			}];
+
 		};
 		
 	}

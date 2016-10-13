@@ -39,10 +39,7 @@ userSchema.pre('save', function(next) {
       if(err)
         return next(err);
 
-        console.log(hash);
-        console.log(user.password);
-
-      	user.password = hash;
+      user.password = hash;
 
     	return next();
     });

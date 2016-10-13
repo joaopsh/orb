@@ -121,7 +121,7 @@
 	//controllers import
 	var orb = angular.module('app.orb', ['ui.router', 'angular-oauth2', 'ngResource', 'ngMaterial', 'ngMessages', 'ngLetterAvatar', 'uiGmapgoogle-maps', 'ngAnimate', 'ngFileUpload']);
 
-	//globals
+	//global consts
 
 
 	//directives import
@@ -129,8 +129,10 @@
 
 	//services import
 	orb.constant('configs', {
-	  apiUrl: 'http://localhost:1200',
-	  chatNamespace: '/chat'
+	  apiUrl: 'http://localhost:1500',
+	  socketioUrl: 'http://localhost:1200',
+	  chatNamespace: '/chat',
+	  mapNamespace: '/map'
 	});
 
 	//services register
@@ -194,11 +196,14 @@
 	});
 	function orbConfig($locationProvider, $stateProvider, $urlRouterProvider, $mdThemingProvider, $httpProvider, OAuthProvider, OAuthTokenProvider, uiGmapGoogleMapApiProvider) {
 	  //$locationProvider.html5Mode(true);
+	  var expireDate = new Date();
+	  expireDate.setDate(expireDate.getDate() + 365);
 
 	  OAuthTokenProvider.configure({
 	    name: 'orbAuth',
 	    options: {
-	      secure: false
+	      secure: false,
+	      expires: expireDate
 	    }
 	  });
 
@@ -343,7 +348,7 @@
 /* 5 */
 /***/ function(module, exports) {
 
-	"use strict";
+	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
 		value: true
@@ -351,11 +356,42 @@
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-	var MapController = function MapController(uiGmapGoogleMapApi, mapService) {
+	var MapController = function MapController($timeout, $rootScope, uiGmapGoogleMapApi, mapService, chatSocketService) {
+		var _this = this;
+
 		_classCallCheck(this, MapController);
 
-		this.default = mapService.getDefaultConfigs();
+		this.default = {
+			center: {}
+		};
+
+		mapService.getDefaultConfigs().then(function (configs) {
+			_this.default = configs;
+		});
+
 		this.options = mapService.getOptions();
+
+		chatSocketService.on('chat:onlineUsers', function (users) {
+			_this.markers = users;
+		});
+
+		chatSocketService.on('chat:user:signin', function (user) {
+			_this.markers.push(user);
+		});
+
+		chatSocketService.on('chat:user:signout', function (user) {
+			_this.markers = _this.markers.filter(function (marker) {
+				return marker.email !== user.email;
+			});
+		});
+
+		if (!chatSocketService.isReady()) {
+			chatSocketService.on('ready', function () {
+				chatSocketService.emit('chat:onlineUsers:get');
+			});
+		} else {
+			chatSocketService.emit('chat:onlineUsers:get');
+		}
 	};
 
 	exports.default = MapController;
@@ -395,6 +431,7 @@
 					username: this.signin.email,
 					password: this.signin.password
 				}).then(function (succ) {
+
 					_this.$state.go('orb');
 				}, function (err) {
 					_this.form.signin.email.$setValidity("emailPassInvalid", false);
@@ -406,7 +443,6 @@
 			value: function signupSubmit() {
 				var _this2 = this;
 
-				console.log(this.signup.firstName);
 				this.userService.add({
 					firstName: this.signup.firstName,
 					lastName: this.signup.lastName,
@@ -428,8 +464,6 @@
 						if (err.param === 'user.lastName') _this2.form.signup.firstName.$setValidity('required', false);
 
 						if (err.param === 'user.email') _this2.form.signup.firstName.$setValidity('required', false);
-
-						console.log(_this2.form.signup);
 
 						if (err.param === 'user.password') _this2.form.signup.firstName.$setValidity('required', false);
 					});
@@ -567,22 +601,36 @@
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	var mapService = function () {
-		function mapService(uiGmapGoogleMapApi) {
+		function mapService($q) {
 			_classCallCheck(this, mapService);
 
-			this.uiGmapGoogleMapApi = uiGmapGoogleMapApi;
+			//this.uiGmapGoogleMapApi = uiGmapGoogleMapApi;
+			this.$q = $q;
 		}
 
 		_createClass(mapService, [{
 			key: "getDefaultConfigs",
 			value: function getDefaultConfigs() {
-				return {
-					center: {
-						latitude: -22.3345175,
-						longitude: -43.130345
-					},
-					zoom: 16
-				};
+				var deferred = this.$q.defer();
+				var configs = {};
+
+				if (navigator.geolocation) {
+					navigator.geolocation.getCurrentPosition(function (position) {
+						configs = {
+							center: {
+								latitude: position.coords.latitude,
+								longitude: position.coords.longitude
+							},
+							zoom: 16
+						};
+
+						deferred.resolve(configs);
+					});
+				} else {
+					deferred.reject();
+				}
+
+				return deferred.promise;
 			}
 		}, {
 			key: "getOptions",
@@ -653,39 +701,83 @@
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	var chatSocketService = function () {
-	  function chatSocketService($rootScope, $state, configs, OAuth, OAuthToken) {
+	  function chatSocketService($rootScope, $state, $mdToast, configs, OAuth, OAuthToken) {
 	    var _this = this;
 
 	    _classCallCheck(this, chatSocketService);
 
 	    this.$rootScope = $rootScope;
 	    this.tryRefresh = true;
-	    this.socket = io.connect(configs.apiUrl + configs.chatNamespace);
+	    this.ready = false;
+
+	    this.socket = io.connect(configs.socketioUrl + configs.chatNamespace, { 'force new connection': true, reconnection: true });
 
 	    this.socket.on('connect', function () {
+	      ;
+	      if (navigator.geolocation) {
+	        navigator.geolocation.getCurrentPosition(function (position) {
 
-	      _this.socket.emit('authentication', {
-	        auth: OAuthToken.getToken()
-	      });
-
-	      _this.socket.on('authenticated', function () {
-	        console.log('socket::authenticated');
-	      });
-
-	      _this.socket.on('unauthorized', function (err) {
-	        if (_this.tryRefresh) {
-	          OAuth.getRefreshToken().then(function () {
-	            console.log('socket::refreshed');
-	            _this.socket.emit('authentication', { auth: OAuthToken.getToken() });
+	          _this.socket.emit('authentication', {
+	            auth: OAuthToken.getToken(),
+	            coords: {
+	              latitude: position.coords.latitude,
+	              longitude: position.coords.longitude
+	            }
 	          });
 
-	          tryRefresh = false;
-	        }
-	      });
+	          _this.socket.on('authenticated', function () {
+	            console.log('socket::authenticated');
+	          });
+
+	          _this.socket.on('disconnect', function () {
+	            _this.ready = false;
+	            _this.tryRefresh = true;
+	            console.log('socket::disconnected');
+	          });
+
+	          _this.socket.on('ready', function () {
+	            _this.ready = true;
+	            console.log('socket::ready');
+	          });
+
+	          _this.socket.on('unauthorized', function (err) {
+	            if (_this.tryRefresh) {
+	              OAuth.getRefreshToken().then(function () {
+	                _this.socket = io.connect(configs.socketioUrl + configs.chatNamespace, { 'force new connection': true, reconnection: true });
+	                _this.socket.emit('authentication', {
+	                  auth: OAuthToken.getToken(),
+	                  coords: {
+	                    latitude: position.coords.latitude,
+	                    longitude: position.coords.longitude
+	                  }
+	                });
+
+	                console.log('socket::refreshed');
+	              });
+
+	              _this.tryRefresh = false;
+	            }
+	          });
+	        });
+	      } else {
+	        $mdToast.show(_this.$mdToast.simple().textContent('Sorry, Orb will not work. Your browser doesn\'t support geolocation, please, update It.').hideDelay(1000 * 15).position('top left'));
+	      }
 	    });
 	  }
 
 	  _createClass(chatSocketService, [{
+	    key: 'disconnect',
+	    value: function disconnect() {
+	      this.socket.disconnect();
+	      this.tryRefresh = true;
+	      this.ready = false;
+	    }
+	  }, {
+	    key: 'isReady',
+	    value: function isReady() {
+	      return this.ready;
+	    }
+	  }, {
 	    key: 'on',
 	    value: function on(eventName, callback) {
 	      var self = this;
@@ -944,7 +1036,6 @@
 		};
 		this.controllerAs = 'chatPanel';
 		this.link = function (scope, elem, attr) {
-
 			scope.minimizeToggle = true;
 
 			scope.minimize = function () {
@@ -956,6 +1047,22 @@
 					scope.minimizeToggle = !scope.minimizeToggle;
 				}
 			};
+
+			scope.chats = [{
+				roomId: 'a1as5as4a5',
+				user: {
+					firstName: 'Maria',
+					lastName: 'Silva',
+					email: 'msilva@live.com'
+				}
+			}, {
+				roomId: 'defe8f7ef',
+				user: {
+					firstName: 'Romarilda',
+					lastName: 'Zenato',
+					email: 'romailda@live.com'
+				}
+			}];
 		};
 	};
 
@@ -1001,13 +1108,16 @@
 		_classCallCheck(this, orbChatBox);
 
 		this.scope = {
-			panelMinimize: '&'
+			panelMinimize: '&',
+			roomUid: '@',
+			user: '='
 		};
 		this.restrict = 'E';
 		this.templateUrl = '/dist/views/templates/chat-box/chat-box.template.html';
 		this.controller = _chatBox2.default;
 		this.controllerAs = 'chatBox';
 		this.link = function (scope, elem, attr) {
+
 			scope.close = function (event) {
 				event.stopPropagation();
 			};
@@ -1017,14 +1127,18 @@
 			};
 
 			scope.send = function () {
-				chatSocketService.emit('myfront', scope.message);
+				var date = new Date();
+				var hours = date.getHours().toString().length === 1 ? '0' + date.getHours() : date.getHours();
+				var minutes = date.getMinutes().toString().length === 1 ? '0' + date.getMinutes() : date.getMinutes();
+
+				elem.find('.messages-box').append('<div class="me"><strong>' + hours + ':' + minutes + ': </strong>' + scope.message + '</div>');
+				chatSocketService.emit('message:send', {
+					roomUid: scope.roomUid,
+					text: scope.message
+				});
 				scope.message = '';
 				elem[0].querySelector('#message-input').focus();
 			};
-
-			chatSocketService.on('tweet', function (tweet) {
-				console.log(tweet);
-			});
 		};
 	};
 

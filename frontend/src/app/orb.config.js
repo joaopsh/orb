@@ -8,11 +8,14 @@ function orbConfig(
 , OAuthTokenProvider
 , uiGmapGoogleMapApiProvider) {
   //$locationProvider.html5Mode(true);
-  
+  var expireDate = new Date();
+  expireDate.setDate(expireDate.getDate() + 365);
+
   OAuthTokenProvider.configure({
     name: 'orbAuth',
     options: {
-      secure: false
+      secure: false,
+      expires: expireDate
     }
   });
 
