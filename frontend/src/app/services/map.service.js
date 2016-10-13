@@ -1,31 +1,16 @@
 class mapService {
-	
 	constructor($q) {
-		//this.uiGmapGoogleMapApi = uiGmapGoogleMapApi;
 		this.$q = $q;
 	}
 
 	getDefaultConfigs() {
-		var deferred = this.$q.defer();
-		var configs = {};
-
-		if (navigator.geolocation) {
-			navigator.geolocation.getCurrentPosition((position) => {
-				configs = { 
-					center: { 
-						latitude: position.coords.latitude,
-						longitude: position.coords.longitude
-					}, 
-					zoom: 16
-				};
-
-				deferred.resolve(configs);
-			});
-		} else {
-			deferred.reject();
-		}
-
-		return deferred.promise;
+		return { 
+			center: { 
+				latitude: -22.3416412,
+				longitude: -43.102957
+			}, 
+			zoom: 16
+		};
 	}
 
 	getOptions() {

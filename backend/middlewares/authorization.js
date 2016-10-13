@@ -1,4 +1,3 @@
-
 var oauth2orize = require('oauth2orize')
     , passport = require('passport')
     , crypto = require('crypto')
@@ -30,8 +29,8 @@ server.exchange(oauth2orize.exchange.password(function (client, email, password,
             var newAccessTokenHash = crypto.createHash('sha1').update(newAccesstoken).digest('hex');
             var newRefreshTokenHash = crypto.createHash('sha1').update(newRefreshToken).digest('hex');
             
-            // 5 minutes token
-            var expirationDate = new Date(new Date().getTime() + (1000 * 60 * 120));
+            // 10 minutes token
+            var expirationDate = new Date(new Date().getTime() + (1000 * 60 * 10));
             
             var accessToken = new AccessToken();
 
@@ -91,8 +90,8 @@ server.exchange(oauth2orize.exchange.refreshToken(function (client, refreshToken
         var newAccessTokenHash = crypto.createHash('sha1').update(newAccesstoken).digest('hex');
         var newRefreshTokenHash = crypto.createHash('sha1').update(newRefreshToken).digest('hex');
         
-        // 5 minutes token
-        var expirationDate = new Date(new Date().getTime() + (1000 * 60 * 120));
+        // 10 minutes token
+        var expirationDate = new Date(new Date().getTime() + (1000 * 60 * 10));
         
         var accessToken = new AccessToken();
 

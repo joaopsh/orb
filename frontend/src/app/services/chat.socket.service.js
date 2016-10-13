@@ -1,79 +1,79 @@
 class chatSocketService {
-  constructor($rootScope, $state, $mdToast, configs, OAuth, OAuthToken) {
-    this.$rootScope = $rootScope;
-    this.tryRefresh = true;
-    this.ready = false;
-    
-    this.socket = io.connect(configs.socketioUrl + configs.chatNamespace, { 'force new connection': true, reconnection: true });
+  constructor($q, $interval, configs, OAuth, OAuthToken) {
+    this.$q = $q;
+    this.OAuthToken = OAuthToken;
+    this.OAuth = OAuth;
+    this.$interval = $interval;
+    this.configs = configs;
+    this.socket = undefined;
 
-    this.socket.on('connect', () => {;
-      if (navigator.geolocation) {
-          navigator.geolocation.getCurrentPosition((position) => {
+  }
 
-          this.socket.emit('authentication', { 
-            auth: OAuthToken.getToken(),
-            coords: {
-              latitude: position.coords.latitude,
-              longitude: position.coords.longitude
-            }
-          });
-          
-          this.socket.on('authenticated', () => {
-            console.log('socket::authenticated');
-          });
+  connect() {
+    var deferred = this.$q.defer();
 
-          this.socket.on('disconnect', () => {
-            this.ready = false;
-            this.tryRefresh = true;
-            console.log('socket::disconnected');
-          });
+    if(this.socket && this.socket.connected)
+      return true;
 
-          this.socket.on('ready', () => {
-            this.ready = true;
-            console.log('socket::ready');
-          });
+    var intervalCounter = 0;
 
-          this.socket.on('unauthorized', (err) => {
-            if(this.tryRefresh) {
-              OAuth.getRefreshToken().then(() => {
-                this.socket = io.connect(configs.socketioUrl + configs.chatNamespace, { 'force new connection': true, reconnection: true });
-                this.socket.emit('authentication', { 
-                  auth: OAuthToken.getToken(),
-                  coords: {
-                    latitude: position.coords.latitude,
-                    longitude: position.coords.longitude
-                  }
-                });
+    var interval = this.$interval(() => {
+      intervalCounter++;
 
-                console.log('socket::refreshed');
-              });
+      this.socket = io.connect(this.configs.socketioUrl + this.configs.chatNamespace, { reconnection: false });
 
-              this.tryRefresh = false;
-            }
-            
-          });
+      //if successfully connection event
+      this.socket.on('connect', () => {
+        //notify
+        console.log('socket::connected');
 
+        //authentication
+        this.socket.emit('authentication', { 
+          credentials: this.OAuthToken.getToken()
         });
 
-      } else {
-        $mdToast.show(this.$mdToast.simple()
-				.textContent('Sorry, Orb will not work. Your browser doesn\'t support geolocation, please, update It.')
-				.hideDelay(1000 * 15)
-				.position('top left'));
+        //if successfully authentication event
+        this.socket.on('authenticated', () => {
+          //notify
+          console.log('socket::authenticated');
+
+          this.$interval.cancel(interval);
+          deferred.resolve();
+        });
+
+        //if failed authentication event
+        this.socket.on('unauthorized', (err) => {
+          //notify
+          console.log('socket::unauthorized');
+
+          if(err.message === 'Expired access token.') {
+            this.OAuth.getRefreshToken();
+          } else {
+            this.$interval.cancel(interval);
+            deferred.reject(err);
+          }
+        });
+
+        this.socket.on('disconnect', () => {
+          if(!this.socket.connected) {
+            //notify
+            console.log('socket::disconnected');
+
+            this.$interval.cancel(interval);
+            deferred.reject();
+          }
+        });
+
+      });
+
+      if(intervalCounter === 5) {
+        this.$interval.cancel(interval);
+        deferred.reject();
       }
+      
+    }, 2000);
 
-    });
-
-  }
-
-  disconnect() {
-    this.socket.disconnect();
-    this.tryRefresh = true;
-    this.ready = false;
-  }
-
-  isReady() {
-    return this.ready;
+    return deferred.promise;
   }
 
   on (eventName, callback) {

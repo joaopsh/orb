@@ -220,12 +220,23 @@
 	  });
 
 	  //routes
-	  $urlRouterProvider.otherwise("/sign");
-
-	  $stateProvider.state('orb', {
+	  $stateProvider.state('default', {
+	    url: "/",
+	    resolve: {
+	      Auth: skipIfAuthenticated,
+	      Socket: function Socket(chatSocketService) {
+	        return chatSocketService.connect();
+	      }
+	    },
+	    templateUrl: "dist/views/sign.html",
+	    controller: "SignController"
+	  }).state('orb', {
 	    url: "/orb",
 	    resolve: {
-	      Auth: Authenticated
+	      Auth: Authenticated,
+	      Socket: function Socket(chatSocketService) {
+	        return chatSocketService.connect();
+	      }
 	    },
 	    templateUrl: "dist/views/orb.html",
 	    controller: "OrbController"
@@ -357,41 +368,14 @@
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	var MapController = function MapController($timeout, $rootScope, uiGmapGoogleMapApi, mapService, chatSocketService) {
-		var _this = this;
-
 		_classCallCheck(this, MapController);
 
-		this.default = {
-			center: {}
-		};
-
-		mapService.getDefaultConfigs().then(function (configs) {
-			_this.default = configs;
-		});
-
+		this.default = mapService.getDefaultConfigs();
 		this.options = mapService.getOptions();
 
-		chatSocketService.on('chat:onlineUsers', function (users) {
-			_this.markers = users;
+		chatSocketService.on('hello', function (message) {
+			console.log(message);
 		});
-
-		chatSocketService.on('chat:user:signin', function (user) {
-			_this.markers.push(user);
-		});
-
-		chatSocketService.on('chat:user:signout', function (user) {
-			_this.markers = _this.markers.filter(function (marker) {
-				return marker.email !== user.email;
-			});
-		});
-
-		if (!chatSocketService.isReady()) {
-			chatSocketService.on('ready', function () {
-				chatSocketService.emit('chat:onlineUsers:get');
-			});
-		} else {
-			chatSocketService.emit('chat:onlineUsers:get');
-		}
 	};
 
 	exports.default = MapController;
@@ -604,33 +588,19 @@
 		function mapService($q) {
 			_classCallCheck(this, mapService);
 
-			//this.uiGmapGoogleMapApi = uiGmapGoogleMapApi;
 			this.$q = $q;
 		}
 
 		_createClass(mapService, [{
 			key: "getDefaultConfigs",
 			value: function getDefaultConfigs() {
-				var deferred = this.$q.defer();
-				var configs = {};
-
-				if (navigator.geolocation) {
-					navigator.geolocation.getCurrentPosition(function (position) {
-						configs = {
-							center: {
-								latitude: position.coords.latitude,
-								longitude: position.coords.longitude
-							},
-							zoom: 16
-						};
-
-						deferred.resolve(configs);
-					});
-				} else {
-					deferred.reject();
-				}
-
-				return deferred.promise;
+				return {
+					center: {
+						latitude: -22.3416412,
+						longitude: -43.102957
+					},
+					zoom: 16
+				};
 			}
 		}, {
 			key: "getOptions",
@@ -701,81 +671,83 @@
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	var chatSocketService = function () {
-	  function chatSocketService($rootScope, $state, $mdToast, configs, OAuth, OAuthToken) {
-	    var _this = this;
-
+	  function chatSocketService($q, $interval, configs, OAuth, OAuthToken) {
 	    _classCallCheck(this, chatSocketService);
 
-	    this.$rootScope = $rootScope;
-	    this.tryRefresh = true;
-	    this.ready = false;
-
-	    this.socket = io.connect(configs.socketioUrl + configs.chatNamespace, { 'force new connection': true, reconnection: true });
-
-	    this.socket.on('connect', function () {
-	      ;
-	      if (navigator.geolocation) {
-	        navigator.geolocation.getCurrentPosition(function (position) {
-
-	          _this.socket.emit('authentication', {
-	            auth: OAuthToken.getToken(),
-	            coords: {
-	              latitude: position.coords.latitude,
-	              longitude: position.coords.longitude
-	            }
-	          });
-
-	          _this.socket.on('authenticated', function () {
-	            console.log('socket::authenticated');
-	          });
-
-	          _this.socket.on('disconnect', function () {
-	            _this.ready = false;
-	            _this.tryRefresh = true;
-	            console.log('socket::disconnected');
-	          });
-
-	          _this.socket.on('ready', function () {
-	            _this.ready = true;
-	            console.log('socket::ready');
-	          });
-
-	          _this.socket.on('unauthorized', function (err) {
-	            if (_this.tryRefresh) {
-	              OAuth.getRefreshToken().then(function () {
-	                _this.socket = io.connect(configs.socketioUrl + configs.chatNamespace, { 'force new connection': true, reconnection: true });
-	                _this.socket.emit('authentication', {
-	                  auth: OAuthToken.getToken(),
-	                  coords: {
-	                    latitude: position.coords.latitude,
-	                    longitude: position.coords.longitude
-	                  }
-	                });
-
-	                console.log('socket::refreshed');
-	              });
-
-	              _this.tryRefresh = false;
-	            }
-	          });
-	        });
-	      } else {
-	        $mdToast.show(_this.$mdToast.simple().textContent('Sorry, Orb will not work. Your browser doesn\'t support geolocation, please, update It.').hideDelay(1000 * 15).position('top left'));
-	      }
-	    });
+	    this.$q = $q;
+	    this.OAuthToken = OAuthToken;
+	    this.OAuth = OAuth;
+	    this.$interval = $interval;
+	    this.configs = configs;
+	    this.socket = undefined;
 	  }
 
 	  _createClass(chatSocketService, [{
-	    key: 'disconnect',
-	    value: function disconnect() {
-	      this.socket.disconnect();
-	      this.tryRefresh = true;
-	      this.ready = false;
-	    }
-	  }, {
-	    key: 'isReady',
-	    value: function isReady() {
-	      return this.ready;
+	    key: 'connect',
+	    value: function connect() {
+	      var _this = this;
+
+	      var deferred = this.$q.defer();
+
+	      if (this.socket && this.socket.connected) return true;
+
+	      var intervalCounter = 0;
+
+	      var interval = this.$interval(function () {
+	        intervalCounter++;
+
+	        _this.socket = io.connect(_this.configs.socketioUrl + _this.configs.chatNamespace, { reconnection: false });
+
+	        //if successfully connection event
+	        _this.socket.on('connect', function () {
+	          //notify
+	          console.log('socket::connected');
+
+	          //authentication
+	          _this.socket.emit('authentication', {
+	            credentials: _this.OAuthToken.getToken()
+	          });
+
+	          //if successfully authentication event
+	          _this.socket.on('authenticated', function () {
+	            //notify
+	            console.log('socket::authenticated');
+
+	            _this.$interval.cancel(interval);
+	            deferred.resolve();
+	          });
+
+	          //if failed authentication event
+	          _this.socket.on('unauthorized', function (err) {
+	            //notify
+	            console.log('socket::unauthorized');
+
+	            if (err.message === 'Expired access token.') {
+	              _this.OAuth.getRefreshToken();
+	            } else {
+	              _this.$interval.cancel(interval);
+	              deferred.reject(err);
+	            }
+	          });
+
+	          _this.socket.on('disconnect', function () {
+	            if (!_this.socket.connected) {
+	              //notify
+	              console.log('socket::disconnected');
+
+	              _this.$interval.cancel(interval);
+	              deferred.reject();
+	            }
+	          });
+	        });
+
+	        if (intervalCounter === 5) {
+	          _this.$interval.cancel(interval);
+	          deferred.reject();
+	        }
+	      }, 2000);
+
+	      return deferred.promise;
 	    }
 	  }, {
 	    key: 'on',
@@ -1131,7 +1103,7 @@
 				var hours = date.getHours().toString().length === 1 ? '0' + date.getHours() : date.getHours();
 				var minutes = date.getMinutes().toString().length === 1 ? '0' + date.getMinutes() : date.getMinutes();
 
-				elem.find('.messages-box').append('<div class="me"><strong>' + hours + ':' + minutes + ': </strong>' + scope.message + '</div>');
+				elem.find('.messages-box').prepend('<div class="me"><strong>' + hours + ':' + minutes + ': </strong>' + scope.message + '</div>');
 				chatSocketService.emit('message:send', {
 					roomUid: scope.roomUid,
 					text: scope.message

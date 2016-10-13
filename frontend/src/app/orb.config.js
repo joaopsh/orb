@@ -32,13 +32,25 @@ function orbConfig(
     });
 
   //routes
-  $urlRouterProvider.otherwise("/sign");
-
   $stateProvider
+  .state('default', {
+    url: "/",
+    resolve: {
+      Auth: skipIfAuthenticated,
+      Socket: function(chatSocketService) {
+        return chatSocketService.connect();
+      }
+    },
+    templateUrl: "dist/views/sign.html",
+    controller: "SignController"
+  })
   .state('orb', {
     url: "/orb",
     resolve: {
-      Auth: Authenticated
+      Auth: Authenticated,
+      Socket: function(chatSocketService) {
+        return chatSocketService.connect();
+      }
     },
     templateUrl: "dist/views/orb.html",
     controller: "OrbController"
