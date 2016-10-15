@@ -1,7 +1,15 @@
 class userService {
 
-	constructor($resource, configs) {
-		this.Resource = $resource(configs.apiUrl + '/user/:id');
+	constructor($http, $resource, configs) {
+		this.Resource = $resource(configs.apiUrl + '/user/:id', {}, {
+			getByAccessToken: {
+				method: 'GET',
+				url: configs.apiUrl + '/user/accesstoken/:accessToken',
+				params: {
+					accessToken: '@accessToken',
+				}
+			}
+		});
 
 	}
 
@@ -14,6 +22,17 @@ class userService {
 			if(errorCb)
 				errorCb(errorResponse);
 
+		});
+	}
+
+	getByAccessToken(accessToken, successCb, errorCb) {
+		this.Resource.getByAccessToken({ accessToken: accessToken }, function(successResponse) {
+			if(successCb)
+				successCb(successResponse.user);
+
+		} , function(errorResponse) {
+			if(errorCb)
+				errorCb(errorResponse);
 		});
 	}
 

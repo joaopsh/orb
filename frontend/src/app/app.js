@@ -12,6 +12,8 @@ import { default as orbService } from './services/orb.service';
 import { default as mapService } from './services/map.service';
 import { default as userService } from './services/user.service';
 import { default as chatSocketService } from './services/chat.socket.service';
+import { default as chatPanelService } from './directives/chat-panel/chat-panel.service';
+import { default as chatBoxService } from './directives/chat-box/chat-box.service';
 
 //directives import
 import { default as contactListDirective } from './directives/contact-list/contact-list.directive.js';
@@ -46,6 +48,8 @@ orb.service('orbService', orbService);
 orb.service('mapService', mapService);
 orb.service('userService', userService);
 orb.service('chatSocketService', chatSocketService);
+orb.service('chatPanelService', chatPanelService);
+orb.service('chatBoxService', chatBoxService);
 
 //controllers register
 orb.controller('HeaderController', HeaderController);

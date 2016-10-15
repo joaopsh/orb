@@ -1,5 +1,6 @@
 class chatSocketService {
-  constructor($q, $interval, configs, OAuth, OAuthToken) {
+  constructor($rootScope, $q, $interval, configs, OAuth, OAuthToken) {
+    this.$rootScope = $rootScope;
     this.$q = $q;
     this.OAuthToken = OAuthToken;
     this.OAuth = OAuth;
@@ -12,20 +13,25 @@ class chatSocketService {
   connect() {
     var deferred = this.$q.defer();
 
-    if(this.socket && this.socket.connected)
-      return true;
-
+    if(this.socket && this.socket.connected){
+      deferred.resolve();
+      return deferred.promise;
+    }
+      
     var intervalCounter = 0;
 
     var interval = this.$interval(() => {
       intervalCounter++;
 
-      this.socket = io.connect(this.configs.socketioUrl + this.configs.chatNamespace, { reconnection: false });
+      this.socket = io.connect(this.configs.socketioUrl + this.configs.chatNamespace, { reconnection: false, 'forceNew': true });
 
       //if successfully connection event
       this.socket.on('connect', () => {
         //notify
         console.log('socket::connected');
+
+        //Init the signout flag
+        this.isSignout = false;
 
         //authentication
         this.socket.emit('authentication', { 
@@ -36,6 +42,12 @@ class chatSocketService {
         this.socket.on('authenticated', () => {
           //notify
           console.log('socket::authenticated');
+        });
+
+        //After all server events are registered and the chat is ready to use.
+        this.socket.on('chat:ready', () => {
+          //notify
+          console.log('chat::ready');
 
           this.$interval.cancel(interval);
           deferred.resolve();
@@ -55,12 +67,13 @@ class chatSocketService {
         });
 
         this.socket.on('disconnect', () => {
-          if(!this.socket.connected) {
+          if(!this.socket.connected && !this.isSignout) {
             //notify
             console.log('socket::disconnected');
 
-            this.$interval.cancel(interval);
-            deferred.reject();
+            this.connect();
+          } else if(this.isSignout) {
+            console.log('socket::disconnected(signout)');
           }
         });
 
@@ -74,6 +87,11 @@ class chatSocketService {
     }, 2000);
 
     return deferred.promise;
+  }
+
+  disconnect() {
+    this.isSignout = true;
+    this.socket.disconnect();
   }
 
   on (eventName, callback) {

@@ -27,7 +27,7 @@
     .panel
       .header
         %img{ src: '/dist/images/signup-banner.png' }
-        %p Register now and enjoy our community!
+        %p Sign up now and enjoy our community!
       %md-divider.divider
       %form{ novalidate: ' ', name: 'sign.form.signup', layout: 'column', flex: ' ', 'ng-submit': 'signupSubmit', 'ng-submit': 'sign.signupSubmit()' }
         %div{ layout: 'row' }
@@ -43,7 +43,7 @@
               %div{ 'ng-message': 'required' } It\'s necessary to enter with your last name.
         %md-input-container
           %label E-mail
-          %input{ type: 'text', name: 'email', 'md-no-asterisk': 'true', 'ng-model': 'sign.signup.email'}
+          %input{ type: 'text', name: 'email', 'md-no-asterisk': 'true', 'ng-model': 'sign.signup.email', 'required': 'true'}
           %div{ 'ng-messages': 'sign.form.signup.email.$error'}
             %div{ 'ng-message': 'required' } It\'s necessary to enter with your e-mail.
         %div{ layout: 'row' }

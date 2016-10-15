@@ -1,9 +1,8 @@
-class ChatPanelDirectiveController {
-
+class ChatPanelController {
 	constructor() {
 		
 	}
 
 }
 
-export default ChatPanelDirectiveController;
+export default ChatPanelController;

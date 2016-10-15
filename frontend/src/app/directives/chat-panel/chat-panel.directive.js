@@ -1,7 +1,6 @@
 import { default as Controller } from './chat-panel.controller'
 
 class orbChatPanel {
-
 	constructor() {
 		this.scope = {};
 		this.restrict = 'E'
@@ -11,6 +10,7 @@ class orbChatPanel {
 		this.link = function(scope, elem, attr) {
 			scope.minimizeToggle = true;
 
+			//minimize and maxmize the panel bar on clicking the chat box header
 			scope.minimize = () => {
 				if(scope.minimizeToggle) {
 					elem.find('.chat-panel').addClass('minimized');

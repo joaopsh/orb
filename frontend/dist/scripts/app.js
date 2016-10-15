@@ -93,23 +93,31 @@
 
 	var _chatSocket2 = _interopRequireDefault(_chatSocket);
 
-	var _contactListDirective = __webpack_require__(13);
+	var _chatPanel = __webpack_require__(13);
+
+	var _chatPanel2 = _interopRequireDefault(_chatPanel);
+
+	var _chatBox = __webpack_require__(14);
+
+	var _chatBox2 = _interopRequireDefault(_chatBox);
+
+	var _contactListDirective = __webpack_require__(15);
 
 	var _contactListDirective2 = _interopRequireDefault(_contactListDirective);
 
-	var _chatPanelDirective = __webpack_require__(15);
+	var _chatPanelDirective = __webpack_require__(17);
 
 	var _chatPanelDirective2 = _interopRequireDefault(_chatPanelDirective);
 
-	var _chatBoxDirective = __webpack_require__(17);
+	var _chatBoxDirective = __webpack_require__(19);
 
 	var _chatBoxDirective2 = _interopRequireDefault(_chatBoxDirective);
 
-	var _searchDirective = __webpack_require__(19);
+	var _searchDirective = __webpack_require__(21);
 
 	var _searchDirective2 = _interopRequireDefault(_searchDirective);
 
-	var _passwordCheckDirective = __webpack_require__(21);
+	var _passwordCheckDirective = __webpack_require__(23);
 
 	var _passwordCheckDirective2 = _interopRequireDefault(_passwordCheckDirective);
 
@@ -140,6 +148,8 @@
 	orb.service('mapService', _map4.default);
 	orb.service('userService', _user2.default);
 	orb.service('chatSocketService', _chatSocket2.default);
+	orb.service('chatPanelService', _chatPanel2.default);
+	orb.service('chatBoxService', _chatBox2.default);
 
 	//controllers register
 	orb.controller('HeaderController', _header2.default);
@@ -219,31 +229,28 @@
 	    key: 'AIzaSyBMaQ5VLbug_gC8le3UCV_R0blPsNhY0ds'
 	  });
 
+	  $urlRouterProvider.otherwise('/sign');
+
 	  //routes
 	  $stateProvider.state('default', {
 	    url: "/",
 	    resolve: {
-	      Auth: skipIfAuthenticated,
-	      Socket: function Socket(chatSocketService) {
-	        return chatSocketService.connect();
-	      }
+	      auth: skipIfAuthenticated
 	    },
 	    templateUrl: "dist/views/sign.html",
 	    controller: "SignController"
 	  }).state('orb', {
 	    url: "/orb",
 	    resolve: {
-	      Auth: Authenticated,
-	      Socket: function Socket(chatSocketService) {
-	        return chatSocketService.connect();
-	      }
+	      auth: Authenticated,
+	      init: initialization
 	    },
 	    templateUrl: "dist/views/orb.html",
 	    controller: "OrbController"
 	  }).state('sign', {
 	    url: "/sign",
 	    resolve: {
-	      Auth: skipIfAuthenticated
+	      auth: skipIfAuthenticated
 	    },
 	    templateUrl: "dist/views/sign.html",
 	    controller: "SignController"
@@ -266,20 +273,100 @@
 	  return defer.promise;
 	};
 
-	var Authenticated = function Authenticated($q, $state, OAuth) {
-	  var defer = $q.defer();
+	var Authenticated = function Authenticated($rootScope, $q, $state, OAuth, OAuthToken, userService) {
+	  var deferred = $q.defer();
 
 	  if (OAuth.isAuthenticated()) {
-	    defer.resolve();
+	    if (!$rootScope.userInfo) {
+	      userService.getByAccessToken(OAuthToken.getToken().access_token, function (user) {
+	        $rootScope.userInfo = user;
+	        deferred.resolve();
+	      }, function (err) {
+	        deferred.reject(err);
+	      });
+	    } else {
+	      deferred.resolve();
+	    }
 	  } else {
 	    $timeout(function () {
 	      $state.go('sign');
 	    });
 
-	    defer.reject();
+	    deferred.reject();
 	  }
 
-	  return defer.promise;
+	  return deferred.promise;
+	};
+
+	var initialization = function initialization($rootScope, $q, chatSocketService) {
+	  var deferred = $q.defer();
+
+	  chatSocketService.connect().then(
+	  //success
+	  function () {
+	    locationWatcher($rootScope, $q, chatSocketService).then(
+	    //success
+	    function () {
+	      deferred.resolve();
+	    },
+	    //error
+	    function (err) {
+	      deferred.reject(err);
+	    });
+	  },
+	  //error
+	  function (err) {
+	    deferred.reject(err);
+	  });
+
+	  return deferred.promise;
+	};
+
+	var locationWatcher = function locationWatcher($rootScope, $q, chatSocketService) {
+	  var deferred = $q.defer();
+
+	  var lastLat = -999;
+	  var lastLng = -999;
+	  // 360 degrees multiplied by 100 meters (min. distance to update location)
+	  // and divided by earth circunference (+- 40.075.000 meters (+- 40.075 km))
+	  var minDistToUpdate = 360 * 100 / 40075000;
+
+	  if (navigator.geolocation) {
+	    if ($rootScope.watchPos) {
+	      deferred.resolve();
+	      return deferred.promise;
+	    }
+
+	    $rootScope.watchPos = navigator.geolocation.watchPosition(
+	    //success
+	    function (position) {
+	      if (Math.abs(Math.abs(lastLat) - Math.abs(position.coords.latitude)) > minDistToUpdate || Math.abs(Math.abs(lastLng) - Math.abs(position.coords.longitude)) > minDistToUpdate || lastLat === -999) {
+
+	        lastLat = position.coords.latitude;
+	        lastLng = position.coords.longitude;
+
+	        chatSocketService.emit('chat:position:update', {
+	          latitude: position.coords.latitude,
+	          longitude: position.coords.longitude
+	        });
+	      }
+
+	      deferred.resolve();
+	    },
+	    //error
+	    function (err) {
+	      deferred.reject(err);
+	    },
+	    //options
+	    {
+	      enableHighAccuracy: true,
+	      maximumAge: 0
+	    });
+	  } else {
+	    deferred.reject();
+	  }
+
+	  return deferred.promise;
 	};
 
 	exports.default = orbConfig;
@@ -299,11 +386,13 @@
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	var HeaderController = function () {
-		function HeaderController($scope, $rootScope, $mdSidenav, $state, OAuth, OAuthToken) {
+		function HeaderController($scope, $rootScope, $mdSidenav, $state, OAuth, OAuthToken, chatSocketService) {
 			_classCallCheck(this, HeaderController);
 
 			this.$state = $state;
+			this.$rootScope = $rootScope;
 			this.OAuth = OAuth;
+			this.chatSocketService = chatSocketService;
 			this.OAuthToken = OAuthToken;
 
 			$rootScope.toggleSidenav = function (componentId) {
@@ -327,6 +416,9 @@
 				var _this = this;
 
 				this.OAuth.revokeToken().then(function () {
+					navigator.geolocation.clearWatch(_this.$rootScope.watchPos);
+					_this.$rootScope.watchPos = undefined;
+					_this.chatSocketService.disconnect();
 					_this.$state.go('sign');
 				});
 			}
@@ -362,20 +454,61 @@
 	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
-		value: true
+	  value: true
 	});
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-	var MapController = function MapController($timeout, $rootScope, uiGmapGoogleMapApi, mapService, chatSocketService) {
-		_classCallCheck(this, MapController);
+	var MapController = function MapController($scope, $timeout, $rootScope, uiGmapGoogleMapApi, mapService, chatSocketService) {
+	  var _this = this;
 
-		this.default = mapService.getDefaultConfigs();
-		this.options = mapService.getOptions();
+	  _classCallCheck(this, MapController);
 
-		chatSocketService.on('hello', function (message) {
-			console.log(message);
-		});
+	  this.config = mapService.getDefaultConfig();
+
+	  //on leaving the page It clears the socket listenners for not replicate the calls when the page is accessed again
+	  $scope.$on('$destroy', function (event) {
+	    chatSocketService.socket.removeAllListeners();
+	  });
+
+	  chatSocketService.on('chat:online:list', function (users) {
+	    _this.markers = [];
+
+	    angular.forEach(users, function (user) {
+	      if ($rootScope.userInfo.email === user.email) _this.config.center = user.coords;
+
+	      var foundMarker = _this.markers.find(function (elem) {
+	        return elem.email === user.email;
+	      });
+
+	      if (foundMarker) foundMarker.coords = user.coords;else {
+	        _this.markers.push(user);
+	      }
+	    });
+
+	    // After recept all online users, this event handle all new users or position change
+	    chatSocketService.on('chat:position:update', function (data) {
+	      if ($rootScope.userInfo.email === data.email) _this.config.center = data.coords;
+
+	      var foundMarker = _this.markers.find(function (elem) {
+	        return elem.email === data.email;
+	      });
+
+	      if (foundMarker) foundMarker.coords = data.coords;else {
+	        _this.markers.push(data);
+	      }
+	    });
+
+	    // Removes the user that left the chat
+	    chatSocketService.on('chat:signout', function (outUser) {
+	      _this.markers = _this.markers.filter(function (user) {
+	        return user.email !== outUser.email;
+	      });
+	    });
+	  });
+
+	  // Tells the server to send me the chat online users list (event catched above)
+	  chatSocketService.emit('chat:online:list', {});
 	};
 
 	exports.default = MapController;
@@ -414,8 +547,7 @@
 				this.OAuth.getAccessToken({
 					username: this.signin.email,
 					password: this.signin.password
-				}).then(function (succ) {
-
+				}).then(function () {
 					_this.$state.go('orb');
 				}, function (err) {
 					_this.form.signin.email.$setValidity("emailPassInvalid", false);
@@ -564,11 +696,11 @@
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-	var homeService = function homeService() {
-		_classCallCheck(this, homeService);
+	var orbService = function orbService() {
+		_classCallCheck(this, orbService);
 	};
 
-	exports.default = homeService;
+	exports.default = orbService;
 
 /***/ },
 /* 10 */
@@ -592,24 +724,20 @@
 		}
 
 		_createClass(mapService, [{
-			key: "getDefaultConfigs",
-			value: function getDefaultConfigs() {
+			key: "getDefaultConfig",
+			value: function getDefaultConfig() {
 				return {
 					center: {
 						latitude: -22.3416412,
 						longitude: -43.102957
 					},
-					zoom: 16
-				};
-			}
-		}, {
-			key: "getOptions",
-			value: function getOptions() {
-				return {
-					mapTypeControl: false,
-					streetViewControl: false,
-					zoomControl: false,
-					styles: [{ "featureType": "road", "stylers": [{ "hue": "#5e00ff" }, { "saturation": -79 }] }, { "featureType": "poi", "stylers": [{ "visibility": "off" }, { "saturation": -78 }, { "hue": "#6600ff" }, { "lightness": -47 }, { "visibility": "off" }] }, { "featureType": "road.local", "stylers": [{ "lightness": 22 }] }, { "featureType": "landscape", "stylers": [{ "hue": "#6600ff" }, { "saturation": -11 }] }, {}, {}, { "featureType": "water", "stylers": [{ "saturation": -65 }, { "hue": "#1900ff" }, { "lightness": 8 }] }, { "featureType": "road.local", "stylers": [{ "weight": 1.3 }, { "lightness": 30 }] }, { "featureType": "transit", "stylers": [{ "visibility": "off" }, { "hue": "#5e00ff" }, { "saturation": -16 }] }, { "featureType": "transit.line", "stylers": [{ "saturation": -72 }] }, {}]
+					zoom: 16,
+					options: {
+						mapTypeControl: false,
+						streetViewControl: false,
+						zoomControl: false,
+						styles: [{ "featureType": "road", "stylers": [{ "hue": "#5e00ff" }, { "saturation": -79 }] }, { "featureType": "poi", "stylers": [{ "visibility": "off" }, { "saturation": -78 }, { "hue": "#6600ff" }, { "lightness": -47 }, { "visibility": "off" }] }, { "featureType": "road.local", "stylers": [{ "lightness": 22 }] }, { "featureType": "landscape", "stylers": [{ "hue": "#6600ff" }, { "saturation": -11 }] }, {}, {}, { "featureType": "water", "stylers": [{ "saturation": -65 }, { "hue": "#1900ff" }, { "lightness": 8 }] }, { "featureType": "road.local", "stylers": [{ "weight": 1.3 }, { "lightness": 30 }] }, { "featureType": "transit", "stylers": [{ "visibility": "off" }, { "hue": "#5e00ff" }, { "saturation": -16 }] }, { "featureType": "transit.line", "stylers": [{ "saturation": -72 }] }, {}]
+					}
 				};
 			}
 		}]);
@@ -634,10 +762,18 @@
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	var userService = function () {
-		function userService($resource, configs) {
+		function userService($http, $resource, configs) {
 			_classCallCheck(this, userService);
 
-			this.Resource = $resource(configs.apiUrl + '/user/:id');
+			this.Resource = $resource(configs.apiUrl + '/user/:id', {}, {
+				getByAccessToken: {
+					method: 'GET',
+					url: configs.apiUrl + '/user/accesstoken/:accessToken',
+					params: {
+						accessToken: '@accessToken'
+					}
+				}
+			});
 		}
 
 		_createClass(userService, [{
@@ -645,6 +781,15 @@
 			value: function add(user, successCb, errorCb) {
 				this.Resource.save({ user: user }, function (successResponse) {
 					if (successCb) successCb(successResponse);
+				}, function (errorResponse) {
+					if (errorCb) errorCb(errorResponse);
+				});
+			}
+		}, {
+			key: 'getByAccessToken',
+			value: function getByAccessToken(accessToken, successCb, errorCb) {
+				this.Resource.getByAccessToken({ accessToken: accessToken }, function (successResponse) {
+					if (successCb) successCb(successResponse.user);
 				}, function (errorResponse) {
 					if (errorCb) errorCb(errorResponse);
 				});
@@ -671,9 +816,10 @@
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	var chatSocketService = function () {
-	  function chatSocketService($q, $interval, configs, OAuth, OAuthToken) {
+	  function chatSocketService($rootScope, $q, $interval, configs, OAuth, OAuthToken) {
 	    _classCallCheck(this, chatSocketService);
 
+	    this.$rootScope = $rootScope;
 	    this.$q = $q;
 	    this.OAuthToken = OAuthToken;
 	    this.OAuth = OAuth;
@@ -689,19 +835,25 @@
 
 	      var deferred = this.$q.defer();
 
-	      if (this.socket && this.socket.connected) return true;
+	      if (this.socket && this.socket.connected) {
+	        deferred.resolve();
+	        return deferred.promise;
+	      }
 
 	      var intervalCounter = 0;
 
 	      var interval = this.$interval(function () {
 	        intervalCounter++;
 
-	        _this.socket = io.connect(_this.configs.socketioUrl + _this.configs.chatNamespace, { reconnection: false });
+	        _this.socket = io.connect(_this.configs.socketioUrl + _this.configs.chatNamespace, { reconnection: false, 'forceNew': true });
 
 	        //if successfully connection event
 	        _this.socket.on('connect', function () {
 	          //notify
 	          console.log('socket::connected');
+
+	          //Init the signout flag
+	          _this.isSignout = false;
 
 	          //authentication
 	          _this.socket.emit('authentication', {
@@ -712,6 +864,12 @@
 	          _this.socket.on('authenticated', function () {
 	            //notify
 	            console.log('socket::authenticated');
+	          });
+
+	          //After all server events are registered and the chat is ready to use.
+	          _this.socket.on('chat:ready', function () {
+	            //notify
+	            console.log('chat::ready');
 
 	            _this.$interval.cancel(interval);
 	            deferred.resolve();
@@ -731,12 +889,13 @@
 	          });
 
 	          _this.socket.on('disconnect', function () {
-	            if (!_this.socket.connected) {
+	            if (!_this.socket.connected && !_this.isSignout) {
 	              //notify
 	              console.log('socket::disconnected');
 
-	              _this.$interval.cancel(interval);
-	              deferred.reject();
+	              _this.connect();
+	            } else if (_this.isSignout) {
+	              console.log('socket::disconnected(signout)');
 	            }
 	          });
 	        });
@@ -748,6 +907,12 @@
 	      }, 2000);
 
 	      return deferred.promise;
+	    }
+	  }, {
+	    key: 'disconnect',
+	    value: function disconnect() {
+	      this.isSignout = true;
+	      this.socket.disconnect();
 	    }
 	  }, {
 	    key: 'on',
@@ -784,6 +949,42 @@
 
 /***/ },
 /* 13 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var chatPanelService = function chatPanelService() {
+		_classCallCheck(this, chatPanelService);
+	};
+
+	exports.default = chatPanelService;
+
+/***/ },
+/* 14 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var chatBoxService = function chatBoxService() {
+		_classCallCheck(this, chatBoxService);
+	};
+
+	exports.default = chatBoxService;
+
+/***/ },
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -792,7 +993,7 @@
 		value: true
 	});
 
-	var _contactList = __webpack_require__(14);
+	var _contactList = __webpack_require__(16);
 
 	var _contactList2 = _interopRequireDefault(_contactList);
 
@@ -816,7 +1017,7 @@
 	exports.default = orbContactList;
 
 /***/ },
-/* 14 */
+/* 16 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -980,7 +1181,7 @@
 	exports.default = ContactListController;
 
 /***/ },
-/* 15 */
+/* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -989,7 +1190,7 @@
 		value: true
 	});
 
-	var _chatPanel = __webpack_require__(16);
+	var _chatPanel = __webpack_require__(18);
 
 	var _chatPanel2 = _interopRequireDefault(_chatPanel);
 
@@ -1010,6 +1211,7 @@
 		this.link = function (scope, elem, attr) {
 			scope.minimizeToggle = true;
 
+			//minimize and maxmize the panel bar on clicking the chat box header
 			scope.minimize = function () {
 				if (scope.minimizeToggle) {
 					elem.find('.chat-panel').addClass('minimized');
@@ -1041,7 +1243,7 @@
 	exports.default = orbChatPanel;
 
 /***/ },
-/* 16 */
+/* 18 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -1052,14 +1254,14 @@
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-	var ChatPanelDirectiveController = function ChatPanelDirectiveController() {
-		_classCallCheck(this, ChatPanelDirectiveController);
+	var ChatPanelController = function ChatPanelController() {
+		_classCallCheck(this, ChatPanelController);
 	};
 
-	exports.default = ChatPanelDirectiveController;
+	exports.default = ChatPanelController;
 
 /***/ },
-/* 17 */
+/* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1068,7 +1270,7 @@
 		value: true
 	});
 
-	var _chatBox = __webpack_require__(18);
+	var _chatBox = __webpack_require__(20);
 
 	var _chatBox2 = _interopRequireDefault(_chatBox);
 
@@ -1104,7 +1306,7 @@
 				var minutes = date.getMinutes().toString().length === 1 ? '0' + date.getMinutes() : date.getMinutes();
 
 				elem.find('.messages-box').prepend('<div class="me"><strong>' + hours + ':' + minutes + ': </strong>' + scope.message + '</div>');
-				chatSocketService.emit('message:send', {
+				chatSocketService.emit('chat:message:send', {
 					roomUid: scope.roomUid,
 					text: scope.message
 				});
@@ -1117,7 +1319,7 @@
 	exports.default = orbChatBox;
 
 /***/ },
-/* 18 */
+/* 20 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -1135,7 +1337,7 @@
 	exports.default = ChatBoxController;
 
 /***/ },
-/* 19 */
+/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1144,7 +1346,7 @@
 		value: true
 	});
 
-	var _search = __webpack_require__(20);
+	var _search = __webpack_require__(22);
 
 	var _search2 = _interopRequireDefault(_search);
 
@@ -1168,7 +1370,7 @@
 	exports.default = orbSearch;
 
 /***/ },
-/* 20 */
+/* 22 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -1262,7 +1464,7 @@
 	exports.default = SearchController;
 
 /***/ },
-/* 21 */
+/* 23 */
 /***/ function(module, exports) {
 
 	'use strict';

@@ -1,6 +1,8 @@
 var express = require('express')
   , router = express.Router()
+  , crypto = require('crypto')
   , User = require('../models/user')
+  , AccessToken = require('../models/accessToken')
   , mongoose = require('mongoose');
 
 router.get('/', function(req, res) {
@@ -43,6 +45,44 @@ router.get('/:id', function(req, res) {
     } else {
       res.status(400).json({ status: 'ERROR', message: 'User does not exist.' });
     }
+
+  });
+
+});
+
+router.get('/accesstoken/:accessToken', function(req, res) {
+  if(!req.params.accessToken)
+    return res.status(400).json({ status: 'ERROR', message: 'Missing access token parameter.'});
+  
+  var accessTokenHash = crypto.createHash('sha1').update(req.params.accessToken).digest('hex');
+
+  AccessToken.findOne({ token: accessTokenHash }, function(err, accessToken) {
+    if(err)
+        return res.status(500).json({ status: 'ERROR', message: 'Internal Server Error.'});
+
+    if(!accessToken)
+        return res.status(400).json({ status: 'ERROR', message: 'Invalid access token.'});
+
+    User.findOne({ email: accessToken.userEmail }, '-password -__v', function(err, user) {
+      if(err)
+          return res.status(500).json({ status: 'ERROR', message: 'Internal Server Error.'});
+
+      if(user) {
+        return res.status(200).json({
+          status: 'OK',
+          user: {
+            id: user.id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email
+          }
+        });
+
+      } else {
+        return res.status(400).json({ status: 'ERROR', message: 'User does not exist.' });
+      }
+
+    });
 
   });
 

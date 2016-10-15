@@ -27,7 +27,7 @@ class orbChatBox {
 				var minutes = date.getMinutes().toString().length === 1 ? '0' + date.getMinutes() : date.getMinutes();
 
 				elem.find('.messages-box').prepend('<div class="me"><strong>'+ hours + ':' + minutes + ': </strong>'+ scope.message +'</div>');
-				chatSocketService.emit('message:send', {
+				chatSocketService.emit('chat:message:send', {
 					roomUid: scope.roomUid,
 					text: scope.message
 				});

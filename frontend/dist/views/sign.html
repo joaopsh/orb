@@ -30,7 +30,7 @@
   <div flex=" " class="signup">
     <div class="panel">
       <div class="header"> <img src="/dist/images/signup-banner.png" />
-        <p>Register now and enjoy our community!</p>
+        <p>Sign up now and enjoy our community!</p>
       </div>
       <md-divider class="divider"></md-divider>
       <form novalidate=" " name="sign.form.signup" layout="column" flex=" " ng-submit="sign.signupSubmit()">
@@ -46,7 +46,7 @@
             </div>
           </md-input-container>
         </div>
-        <md-input-container> <label>E-mail</label> <input type="text" name="email" md-no-asterisk="true" ng-model="sign.signup.email" />
+        <md-input-container> <label>E-mail</label> <input type="text" name="email" md-no-asterisk="true" ng-model="sign.signup.email" required="true" />
           <div ng-messages="sign.form.signup.email.$error">
             <div ng-message="required">It's necessary to enter with your e-mail.</div>
           </div>

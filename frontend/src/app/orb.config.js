@@ -31,15 +31,14 @@ function orbConfig(
         key: 'AIzaSyBMaQ5VLbug_gC8le3UCV_R0blPsNhY0ds',
     });
 
+  $urlRouterProvider.otherwise('/sign');
+
   //routes
   $stateProvider
   .state('default', {
     url: "/",
     resolve: {
-      Auth: skipIfAuthenticated,
-      Socket: function(chatSocketService) {
-        return chatSocketService.connect();
-      }
+      auth: skipIfAuthenticated,
     },
     templateUrl: "dist/views/sign.html",
     controller: "SignController"
@@ -47,10 +46,8 @@ function orbConfig(
   .state('orb', {
     url: "/orb",
     resolve: {
-      Auth: Authenticated,
-      Socket: function(chatSocketService) {
-        return chatSocketService.connect();
-      }
+      auth: Authenticated,
+      init: initialization,
     },
     templateUrl: "dist/views/orb.html",
     controller: "OrbController"
@@ -58,7 +55,7 @@ function orbConfig(
   .state('sign', {
     url: "/sign",
     resolve: {
-      Auth: skipIfAuthenticated
+      auth: skipIfAuthenticated
     },
     templateUrl: "dist/views/sign.html",
     controller: "SignController"
@@ -84,21 +81,109 @@ var skipIfAuthenticated = function ($q, OAuth) {
   return defer.promise;
 }
 
-var Authenticated = function ($q, $state, OAuth) {
-  var defer = $q.defer();
+var Authenticated = function ($rootScope, $q, $state, OAuth, OAuthToken, userService) {
+  var deferred = $q.defer();
 
   if(OAuth.isAuthenticated()) {
-    defer.resolve();
+    if(!$rootScope.userInfo) {
+      userService.getByAccessToken(OAuthToken.getToken().access_token, (user) => {
+        $rootScope.userInfo = user;
+        deferred.resolve();
+
+      }, (err) => {
+        deferred.reject(err);
+      });
+    } else {
+      deferred.resolve();
+    }
 
   } else {
     $timeout(function () {
       $state.go('sign');
     });
     
-    defer.reject();
+    deferred.reject();
   }
 
-  return defer.promise;
+  return deferred.promise;
+}
+
+var initialization = function($rootScope, $q, chatSocketService) {
+  var deferred = $q.defer();
+
+  chatSocketService.connect().then(
+    //success
+    () => {
+      locationWatcher($rootScope, $q, chatSocketService).then(
+        //success
+        () => {
+          deferred.resolve();
+        },
+        //error
+        (err) => {
+          deferred.reject(err);
+        }
+      );
+    },
+    //error
+    (err) => {
+      deferred.reject(err);
+    }
+  );
+
+  return deferred.promise;
+}
+
+var locationWatcher = function($rootScope, $q, chatSocketService) {
+  var deferred = $q.defer();
+
+  var lastLat = -999;
+  var lastLng = -999;
+  // 360 degrees multiplied by 100 meters (min. distance to update location)
+  // and divided by earth circunference (+- 40.075.000 meters (+- 40.075 km))
+  const minDistToUpdate = 360 * 100 / 40075000;
+   
+  if (navigator.geolocation) {
+    if($rootScope.watchPos) {
+      deferred.resolve();
+      return deferred.promise;
+    }
+
+    $rootScope.watchPos = navigator.geolocation.watchPosition(
+      //success
+      (position) => {
+        if(Math.abs(Math.abs(lastLat) - Math.abs(position.coords.latitude)) > minDistToUpdate
+          || Math.abs(Math.abs(lastLng) - Math.abs(position.coords.longitude)) > minDistToUpdate
+          || lastLat === -999) {
+
+            lastLat = position.coords.latitude;
+            lastLng = position.coords.longitude;
+
+            chatSocketService.emit('chat:position:update', {
+              latitude: position.coords.latitude,
+              longitude: position.coords.longitude
+            });
+
+          }
+        
+        deferred.resolve();
+      },
+      //error
+      (err) => {
+        deferred.reject(err);
+      },
+      //options
+      {
+        enableHighAccuracy: true,
+        maximumAge: 0
+      }
+    );
+
+  } else {
+    deferred.reject();
+  }
+
+  return deferred.promise;
 }
 
 export default orbConfig;

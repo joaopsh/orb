@@ -13,8 +13,7 @@ class SignController {
 		this.OAuth.getAccessToken({
 			username: this.signin.email,
 			password: this.signin.password
-		}).then((succ) => {
-			
+		}).then(() => {
 			this.$state.go('orb');
 		}, (err) => {
 			this.form.signin.email.$setValidity("emailPassInvalid", false);

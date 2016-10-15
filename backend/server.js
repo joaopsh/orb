@@ -15,6 +15,9 @@ var userController = require('./controllers/userController')
 	, clientController = require('./controllers/clientController')
 	, tokenController = require('./controllers/tokenController');
 
+//set environment
+process.env.NODE_ENV = 'dev';
+
 mongoose.connect(config.mongodb);
 
 //middlewares register
@@ -38,9 +41,9 @@ app.use(function(req, res, next) {
 //routes register
 app.post('/oauth/token', oauth.token);
 app.use('/oauth', passport.authenticate('accessToken', { session: false }), tokenController);
-app.use('/user', userController);
+app.use('/user', passport.authenticate('accessToken', { session: false }), userController);
 app.use('/client', passport.authenticate('accessToken', { session: false }), clientController);
 
 app.listen(config.app.apiPort, function(){
-  console.log('Orb Server running on PORT ' + config.app.apiPort);
+  console.log('Orb API running on PORT ' + config.app.apiPort);
 });

@@ -1,9 +1,8 @@
-class homeService {
-
+class orbService {
 	constructor() {
 		
 	}
 	
 }
 
-export default homeService;
+export default orbService;

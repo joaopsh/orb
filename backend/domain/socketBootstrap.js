@@ -47,7 +47,7 @@ var socketBootstrap = function(io) {
             
         },
         postAuthenticate: function(socket, data) {
-            chatSocketHandler(socket);
+            chatSocketHandler(chat, socket);
         },
         timeout: 1000 * 10
     });

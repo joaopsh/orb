@@ -1,5 +1,5 @@
 <div ng-controller="HeaderController as header">
-  <header ng-class="{ fixed: header.isState('orb') }">
+  <header ng-class="{ 'orb-header': header.isState('orb') }">
     <div class="container">
       <div layout="row" layout-align="start center" class="brand"> <i flex="nogrow" ng-click="$root.toggleSidenav(&quot;left-sidenav&quot;)" ng-if="header.isAuthenticated()" class="material-icons">menu</i> <img src="/dist/images/brand.png" flex="noshrink" /></div>
       <nav class="menu">

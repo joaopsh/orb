@@ -3,13 +3,22 @@ $search-font-color: #e1e8f9;
 header {
 	width: 100%;
 	z-index: 1;
+	background-color: #f5f4f4;
+
+	&.orb-header {
+		position: fixed;
+		
+		> .container {
+			background-color: rgba(176,164,196,0.5);
+			border-bottom: solid 2px #7500B8;
+		}
+	}
 
 	> .container {
 		display: flex;
 		flex-wrap: wrap;
 		align-items: center;
-		background-color: rgba(176,164,196,0.5);
-		border-bottom: solid 2px #7500B8;
+		box-shadow: 0px 2px 5px 0px rgb(229, 226, 234);
 		padding: 5px;
 		
 		> .brand {

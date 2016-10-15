@@ -1,7 +1,9 @@
 class HeaderController {
-	constructor($scope, $rootScope, $mdSidenav, $state, OAuth, OAuthToken) {
+	constructor($scope, $rootScope, $mdSidenav, $state, OAuth, OAuthToken, chatSocketService) {
 		this.$state = $state;
+		this.$rootScope = $rootScope;
 		this.OAuth = OAuth;
+		this.chatSocketService = chatSocketService;
 		this.OAuthToken = OAuthToken;
 
 		$rootScope.toggleSidenav = (componentId) => {
@@ -19,6 +21,9 @@ class HeaderController {
 
 	logout() {
 		this.OAuth.revokeToken().then(() => {
+			navigator.geolocation.clearWatch(this.$rootScope.watchPos);
+			this.$rootScope.watchPos = undefined;
+			this.chatSocketService.disconnect();
 			this.$state.go('sign');
 		});
 		

@@ -1,5 +1,5 @@
 %div{ 'ng-controller': 'HeaderController as header' }
-  != "<header ng-class=\"{ fixed: header.isState('orb') }\" >"
+  != "<header ng-class=\"{ 'orb-header': header.isState('orb') }\" >"
     .container
       %div.brand{ layout: 'row', 'layout-align': 'start center' }
         %i.material-icons{ flex: 'nogrow', 'ng-click': '$root.toggleSidenav("left-sidenav")', 'ng-if': 'header.isAuthenticated()' } menu
