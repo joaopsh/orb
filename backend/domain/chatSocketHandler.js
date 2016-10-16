@@ -18,6 +18,7 @@ sub.setMaxListeners(0);
 var chatSocketHandler = function(chat, socket) {
     //subscribes
     sub.subscribe('chat:position:update');
+    //It works like an invitation box to each user
     sub.subscribe('chat:invitation:' + socket.user.email);
     sub.subscribe('chat:signout');
 
@@ -27,6 +28,8 @@ var chatSocketHandler = function(chat, socket) {
         storage.hmset('chat.onlineList'
             , socket.user.email
             , JSON.stringify({
+                firstName: socket.user.firstName,
+                lastName: socket.user.lastName,
                 coords: {
                     latitude: data.latitude,
                     longitude: data.longitude
@@ -35,13 +38,10 @@ var chatSocketHandler = function(chat, socket) {
         );
 
         data.email = socket.user.email;
+        data.firstName = socket.user.firstName;
+        data.lastName = socket.user.lastName;
 
         pub.publish('chat:position:update', JSON.stringify(data));
-    });
-
-    socket.on('chat:signout', function(data) {
-        data.email = socket.user.email;
-        pub.publish('chat:signout', JSON.stringify(data));
     });
 
     socket.on('chat:message', function(data) {
@@ -51,24 +51,32 @@ var chatSocketHandler = function(chat, socket) {
 
     // Creates a chat room and invites the target user
     socket.on('chat:new', function(invitedUser) {
-        var roomUid = utils.uid(32);
+        var roomId = utils.uid(32);
 
-        sub.subscribe('chat:room:' + roomUid);
+        sub.subscribe('chat:room:' + roomId);
 
         sub.on("message", function(channel, message) {
-            if(channel === ('chat:room:' + roomUid)) {
+            if(channel === ('chat:room:' + roomId)) {
                 socket.emit('chat:message', JSON.parse(message));
             }
         });
 
         socket.emit('chat:new', {
-            roomUid: roomUid
+            roomId: roomId,
+            invitedUser: {
+                email: invitedUser.email,
+                firstName: invitedUser.firstName,
+                lastName: invitedUser.lastName
+            }
         });
 
         pub.publish('chat:invitation:' + invitedUser.email, JSON.stringify({
-            from: socket.user.email,
-            to: invitedUser.email,
-            roomUid: roomUid
+            roomId: roomId,
+            from: {
+                email: socket.user.email,
+                firstName: socket.user.firstName,
+                lastName: socket.user.lastName
+            }
         }));
 
     });
@@ -81,6 +89,8 @@ var chatSocketHandler = function(chat, socket) {
 
                 socket.broadcast.emit('chat:position:update', {
                     email: data.email,
+                    firstName: data.firstName,
+                    lastName: data.lastName,
                     coords: {
                         latitude: data.latitude,
                         longitude: data.longitude
@@ -106,13 +116,15 @@ var chatSocketHandler = function(chat, socket) {
             var keys = Object.keys(onlineList);
 
             for(var i = 0; i < keys.length; i++) {
-                var location = JSON.parse(onlineList[keys[i]]);
+                var userInfoParse = JSON.parse(onlineList[keys[i]]);
 
                 result.push({
                     email: keys[i],
+                    firstName: userInfoParse.firstName,
+                    lastName: userInfoParse.lastName,
                     coords: {
-                        latitude: location.coords.latitude,
-                        longitude: location.coords.longitude
+                        latitude: userInfoParse.coords.latitude,
+                        longitude: userInfoParse.coords.longitude
                     }
                 });
                 

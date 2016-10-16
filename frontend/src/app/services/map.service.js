@@ -6,8 +6,8 @@ class mapService {
 	getDefaultConfig() {
 		return { 
 			center: { 
-				latitude: -22.3416412,
-				longitude: -43.102957
+				latitude: -22.1111,
+				longitude: -50.1111
 			},
 			zoom: 16,
 			options: {

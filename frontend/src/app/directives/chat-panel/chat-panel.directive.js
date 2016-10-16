@@ -5,9 +5,9 @@ class orbChatPanel {
 		this.scope = {};
 		this.restrict = 'E'
 		this.templateUrl =  '/dist/views/templates/chat-panel/chat-panel.template.html';
-		this.controller = () => new Controller();
+		this.controller = ($rootScope) => new Controller($rootScope);
 		this.controllerAs = 'chatPanel';
-		this.link = function(scope, elem, attr) {
+		this.link = function(scope, elem, attr, chatPanel) {
 			scope.minimizeToggle = true;
 
 			//minimize and maxmize the panel bar on clicking the chat box header
@@ -19,24 +19,8 @@ class orbChatPanel {
 					elem.find('.chat-panel').removeClass('minimized');
 					scope.minimizeToggle = !scope.minimizeToggle;
 				}
-			}
 
-			scope.chats = [{
-				roomId: 'a1as5as4a5',
-				user: {
-					firstName: 'Maria',
-					lastName: 'Silva',
-					email: 'msilva@live.com'
-				}
-			},
-			{
-				roomId: 'defe8f7ef',
-				user: {
-					firstName: 'Romarilda',
-					lastName: 'Zenato',
-					email: 'romailda@live.com'
-				}
-			}];
+			}
 
 		};
 		

@@ -1,3 +1,3 @@
-%section.chat-panel
+%section.chat-panel{ 'ng-show': 'chatPanel.chats.length > 0' }
   .container
-    %orb-chat-box{ 'ng-repeat': 'chat in chats', 'panel-minimize': 'minimize()', 'room-uid': 'chat.roomId', user: 'chat.user' }
+    %orb-chat-box{ 'ng-repeat': 'chat in chatPanel.chats', 'panel-minimize': 'minimize()', chats: 'chatPanel.chats', 'room-id': 'chat.roomId', user: 'chat.invitedUser' }

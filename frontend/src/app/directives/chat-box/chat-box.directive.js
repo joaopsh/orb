@@ -4,17 +4,20 @@ class orbChatBox {
 	constructor(chatSocketService) {
 		this.scope = {
 			panelMinimize:'&',
-			roomUid:'@',
-			user:'='
+			roomId:'@',
+			user:'=',
+			chats: '='
 		};
 		this.restrict = 'E';
 		this.templateUrl =  '/dist/views/templates/chat-box/chat-box.template.html';
-		this.controller = Controller;
+		this.controller = () => new Controller();
 		this.controllerAs = 'chatBox';
 		this.link = (scope, elem, attr) => {
-
 			scope.close = (event) => {
 				event.stopPropagation();
+				scope.chats = scope.chats.filter(function(chat) {
+					return chat.invitedUser.email !== scope.user.email;
+				});
 			}
 
 			scope.favorite = (event) => {
@@ -28,7 +31,7 @@ class orbChatBox {
 
 				elem.find('.messages-box').prepend('<div class="me"><strong>'+ hours + ':' + minutes + ': </strong>'+ scope.message +'</div>');
 				chatSocketService.emit('chat:message:send', {
-					roomUid: scope.roomUid,
+					roomId: scope.roomId,
 					text: scope.message
 				});
 				scope.message = '';

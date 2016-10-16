@@ -1,6 +1,7 @@
 class chatSocketService {
-  constructor($rootScope, $q, $interval, configs, OAuth, OAuthToken) {
+  constructor($state, $rootScope, $q, $interval, configs, OAuth, OAuthToken) {
     this.$rootScope = $rootScope;
+    this.$state = $state;
     this.$q = $q;
     this.OAuthToken = OAuthToken;
     this.OAuth = OAuth;
@@ -44,13 +45,20 @@ class chatSocketService {
           console.log('socket::authenticated');
         });
 
-        //After all server events are registered and the chat is ready to use.
+        //After all server events are registered and the user location has been sent to server, the chat is ready to use.
         this.socket.on('chat:ready', () => {
-          //notify
-          console.log('chat::ready');
+          this.positionWatcher().then(
+            (succ) => {
+              this.$interval.cancel(interval);
+              deferred.resolve();
 
-          this.$interval.cancel(interval);
-          deferred.resolve();
+              //notify
+              console.log('chat::ready');
+            },
+            (err) => {
+              deferred.reject(err);
+            });
+
         });
 
         //if failed authentication event
@@ -67,14 +75,16 @@ class chatSocketService {
         });
 
         this.socket.on('disconnect', () => {
-          if(!this.socket.connected && !this.isSignout) {
-            //notify
-            console.log('socket::disconnected');
+          //clears the location watch because It'll need to instantly update the location when reconnected
+          navigator.geolocation.clearWatch(this.$rootScope.watchPos);
+          this.$rootScope.watchPos = undefined;
 
+          if(!this.isSignout) {
             this.connect();
-          } else if(this.isSignout) {
-            console.log('socket::disconnected(signout)');
           }
+
+          //notify
+          console.log('socket::disconnected');
         });
 
       });
@@ -118,6 +128,58 @@ class chatSocketService {
         });
       });
 
+  }
+
+  positionWatcher() {
+    var deferred = this.$q.defer();
+
+    var lastLat = -999;
+    var lastLng = -999;
+    // 360 degrees multiplied by 100 meters (min. distance to update location)
+    // and divided by earth circunference (+- 40.075.000 meters (+- 40.075 km))
+    const minDistToUpdate = 360 * 100 / 40075000;
+    
+    if (navigator.geolocation) {
+      if(this.$rootScope.watchPos) {
+        deferred.resolve();
+        return deferred.promise;
+      }
+
+      this.$rootScope.watchPos = navigator.geolocation.watchPosition(
+        //success
+        (position) => {
+          if(Math.abs(Math.abs(lastLat) - Math.abs(position.coords.latitude)) > minDistToUpdate
+            || Math.abs(Math.abs(lastLng) - Math.abs(position.coords.longitude)) > minDistToUpdate
+            || lastLat === -999) {
+
+              lastLat = position.coords.latitude;
+              lastLng = position.coords.longitude;
+
+              this.emit('chat:position:update', {
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude
+              });
+
+            }
+          
+          deferred.resolve();
+        },
+        //error
+        (err) => {
+          deferred.reject(err);
+        },
+        //options
+        {
+          enableHighAccuracy: true,
+          maximumAge: 0
+        }
+      );
+
+    } else {
+      deferred.reject('Unable to use browser location.');
+    }
+
+    return deferred.promise;
   }
 
 }

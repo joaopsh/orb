@@ -47,7 +47,7 @@ function orbConfig(
     url: "/orb",
     resolve: {
       auth: Authenticated,
-      init: initialization,
+      socket: socketInit,
     },
     templateUrl: "dist/views/orb.html",
     controller: "OrbController"
@@ -108,80 +108,19 @@ var Authenticated = function ($rootScope, $q, $state, OAuth, OAuthToken, userSer
   return deferred.promise;
 }
 
-var initialization = function($rootScope, $q, chatSocketService) {
+var socketInit = function($rootScope, $q, chatSocketService) {
   var deferred = $q.defer();
 
   chatSocketService.connect().then(
     //success
     () => {
-      locationWatcher($rootScope, $q, chatSocketService).then(
-        //success
-        () => {
-          deferred.resolve();
-        },
-        //error
-        (err) => {
-          deferred.reject(err);
-        }
-      );
+      deferred.resolve();
     },
     //error
     (err) => {
       deferred.reject(err);
     }
   );
-
-  return deferred.promise;
-}
-
-var locationWatcher = function($rootScope, $q, chatSocketService) {
-  var deferred = $q.defer();
-
-  var lastLat = -999;
-  var lastLng = -999;
-  // 360 degrees multiplied by 100 meters (min. distance to update location)
-  // and divided by earth circunference (+- 40.075.000 meters (+- 40.075 km))
-  const minDistToUpdate = 360 * 100 / 40075000;
-   
-  if (navigator.geolocation) {
-    if($rootScope.watchPos) {
-      deferred.resolve();
-      return deferred.promise;
-    }
-
-    $rootScope.watchPos = navigator.geolocation.watchPosition(
-      //success
-      (position) => {
-        if(Math.abs(Math.abs(lastLat) - Math.abs(position.coords.latitude)) > minDistToUpdate
-          || Math.abs(Math.abs(lastLng) - Math.abs(position.coords.longitude)) > minDistToUpdate
-          || lastLat === -999) {
-
-            lastLat = position.coords.latitude;
-            lastLng = position.coords.longitude;
-
-            chatSocketService.emit('chat:position:update', {
-              latitude: position.coords.latitude,
-              longitude: position.coords.longitude
-            });
-
-          }
-        
-        deferred.resolve();
-      },
-      //error
-      (err) => {
-        deferred.reject(err);
-      },
-      //options
-      {
-        enableHighAccuracy: true,
-        maximumAge: 0
-      }
-    );
-
-  } else {
-    deferred.reject();
-  }
 
   return deferred.promise;
 }
