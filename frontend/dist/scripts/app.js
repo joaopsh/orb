@@ -475,6 +475,7 @@
 	      if (foundMarker) foundMarker.coords = userMarker.coords;else {
 	        userMarker.events = {
 	          click: this.newChatEventHandler.bind(this, {
+	            id: userMarker.id,
 	            email: userMarker.email,
 	            firstName: userMarker.firstName,
 	            lastName: userMarker.lastName
@@ -510,6 +511,7 @@
 	        if (foundMarker) foundMarker.coords = userMarker.coords;else {
 	          userMarker.events = {
 	            click: _this2.newChatEventHandler.bind(_this2, {
+	              id: userMarker.id,
 	              email: userMarker.email,
 	              firstName: userMarker.firstName,
 	              lastName: userMarker.lastName
@@ -530,7 +532,7 @@
 	        _this3.$rootScope.$broadcast('panelController:newChat', newChat);
 	      });
 
-	      if (user.email !== this.$rootScope.userInfo.email) this.chatSocketService.emit('chat:new', user);
+	      if (user.email !== this.$rootScope.userInfo.email) this.chatSocketService.emit('chat:new', [user]);
 	    }
 	  }]);
 
@@ -1341,19 +1343,10 @@
 			key: 'newChat',
 			value: function newChat(_newChat) {
 				var foundChat = this.chats.find(function (chat) {
-					return chat.email === _newChat.email;
+					return chat.to.email === _newChat.to.email;
 				});
 
 				if (!foundChat) this.chats.push(_newChat);
-			}
-		}, {
-			key: 'removeChat',
-			value: function removeChat() {
-				var args = Array.prototype.slice.call(arguments);
-
-				this.chats = this.chats.filter(function (chat) {
-					return chat.email !== email;
-				});
 			}
 		}]);
 
@@ -1386,7 +1379,7 @@
 		this.scope = {
 			panelMinimize: '&',
 			roomId: '@',
-			user: '=',
+			chat: '=',
 			chats: '='
 		};
 		this.restrict = 'E';
@@ -1399,7 +1392,7 @@
 			scope.close = function (event) {
 				event.stopPropagation();
 				scope.chats = scope.chats.filter(function (chat) {
-					return chat.invitedUser.email !== scope.user.email;
+					return chat.to.email !== scope.chat.to.email;
 				});
 			};
 
@@ -1414,7 +1407,7 @@
 
 				elem.find('.messages-box').prepend('<div class="me"><strong>' + hours + ':' + minutes + ': </strong>' + scope.message + '</div>');
 				chatSocketService.emit('chat:message:send', {
-					roomId: scope.roomId,
+					to: scope.chat.to,
 					text: scope.message
 				});
 				scope.message = '';

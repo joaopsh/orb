@@ -1,5 +1,5 @@
 <section ng-show="chatPanel.chats.length &gt; 0" class="chat-panel">
   <div class="container">
-    <orb-chat-box ng-repeat="chat in chatPanel.chats" panel-minimize="minimize()" chats="chatPanel.chats" room-id="chat.roomId" user="chat.invitedUser"></orb-chat-box>
+    <orb-chat-box ng-repeat="chat in chatPanel.chats" panel-minimize="minimize()" chats="chatPanel.chats" chat="chat"></orb-chat-box>
   </div>
 </section>

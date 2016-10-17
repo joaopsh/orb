@@ -10,21 +10,13 @@ class ChatPanelController {
 
 	newChat(newChat) {
 		var foundChat = this.chats.find(function(chat){
-			return chat.email === newChat.email;
+			return chat.to.email === newChat.to.email;
 		});
 
 		if(!foundChat)
 			this.chats.push(newChat);
 	}
-
-	removeChat() {
-		var args = Array.prototype.slice.call(arguments);
-
-		this.chats = this.chats.filter(function(chat) {
-			return chat.email !== email;
-		});
-	}
-
+	
 }
 
 export default ChatPanelController;

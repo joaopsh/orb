@@ -3,7 +3,9 @@ var config = require('../config.json')
     , storage = redis.createClient(config.redis.port, config.redis.host)
     , sub = redis.createClient(config.redis.port, config.redis.host)
 	, pub = redis.createClient(config.redis.port, config.redis.host)
-    , utils = require("../helpers/utils")
+    , utils = require('../helpers/utils')
+    , Chat = require('../models/chat')
+    , repo = require('./chatSocketHandlerRepository');
 
 storage.on('connect', function() {
     if(process.env.NODE_ENV === 'dev')
@@ -15,6 +17,7 @@ storage.on('connect', function() {
 //It's limited to ten listeners. Zero means infinity
 sub.setMaxListeners(0);
 
+//handler
 var chatSocketHandler = function(chat, socket) {
     //subscribes
     sub.subscribe('chat:position:update');
@@ -28,6 +31,7 @@ var chatSocketHandler = function(chat, socket) {
         storage.hmset('chat.onlineList'
             , socket.user.email
             , JSON.stringify({
+                id: socket.user.id,
                 firstName: socket.user.firstName,
                 lastName: socket.user.lastName,
                 coords: {
@@ -37,6 +41,7 @@ var chatSocketHandler = function(chat, socket) {
             })
         );
 
+        data.id = socket.user.id;
         data.email = socket.user.email;
         data.firstName = socket.user.firstName;
         data.lastName = socket.user.lastName;
@@ -50,34 +55,30 @@ var chatSocketHandler = function(chat, socket) {
     });
 
     // Creates a chat room and invites the target user
-    socket.on('chat:new', function(invitedUser) {
-        var roomId = utils.uid(32);
+    socket.on('chat:new', function(invitedUsers) {
+        if(!Array.isArray(invitedUsers))
+            throw new Error('invitedUsers variable in chat:new event is not an array.');
 
-        sub.subscribe('chat:room:' + roomId);
+        var invitedUsersIds = [socket.user.id];
 
-        sub.on("message", function(channel, message) {
-            if(channel === ('chat:room:' + roomId)) {
-                socket.emit('chat:message', JSON.parse(message));
-            }
+        invitedUsers.forEach(function(invitedUser) {
+            invitedUsersIds.push(invitedUser.id);
         });
 
-        socket.emit('chat:new', {
-            roomId: roomId,
-            invitedUser: {
-                email: invitedUser.email,
-                firstName: invitedUser.firstName,
-                lastName: invitedUser.lastName
-            }
-        });
+        // Get an existing chat or create a new one, then gets the full user objects
+        repo.getChatAndMembersAndMessagesService(invitedUsersIds).then(function(chat) {
+            sub.subscribe('chat:room:' + chat.roomId);
 
-        pub.publish('chat:invitation:' + invitedUser.email, JSON.stringify({
-            roomId: roomId,
-            from: {
-                email: socket.user.email,
-                firstName: socket.user.firstName,
-                lastName: socket.user.lastName
-            }
-        }));
+            sub.on("message", function(channel, message) {
+                if(channel === ('chat:room:' + chat.roomId)) {
+                    socket.emit('chat:message', JSON.parse(message));
+                }
+            });
+
+            socket.emit('chat:new', chat);
+
+            pub.publish('chat:invitation:' + invitedUser.email, JSON.stringify(chat));
+        });
 
     });
 
@@ -88,6 +89,7 @@ var chatSocketHandler = function(chat, socket) {
                 var data = JSON.parse(message);
 
                 socket.broadcast.emit('chat:position:update', {
+                    id: data.id,
                     email: data.email,
                     firstName: data.firstName,
                     lastName: data.lastName,
@@ -119,6 +121,7 @@ var chatSocketHandler = function(chat, socket) {
                 var userInfoParse = JSON.parse(onlineList[keys[i]]);
 
                 result.push({
+                    id: userInfoParse.id,
                     email: keys[i],
                     firstName: userInfoParse.firstName,
                     lastName: userInfoParse.lastName,

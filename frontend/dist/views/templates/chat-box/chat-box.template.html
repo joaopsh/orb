@@ -4,7 +4,7 @@
       <div class="avatar">
         <ng-letter-avatar data="Maria" shape="round" fontFamily="Open Sans" fontSize="10px" height="40px" width="40px"></ng-letter-avatar> <span class="status"></span></div>
       <div class="name">
-        <h1>{{ user.firstName + ' ' + user.lastName }}</h1></div>
+        <h1>{{ chat.to.firstName.split(' ')[0] + ' ' + chat.to.lastName.split(' ')[chat.to.lastName.split(' ').length - 1] }}</h1></div>
       <div layout="row" layout-align="initial center" class="controls"> <i ng-click="favorite($event)" class="material-icons favorite">star</i>
         <div class="minimizeToggle"></div>
       </div> <i ng-click="close($event)" class="material-icons close">close</i></div>

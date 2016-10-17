@@ -5,7 +5,7 @@
         %ng-letter-avatar{ data: "Maria", shape: "round", fontFamily: "Open Sans", fontSize: "10px", height: "40px", width: "40px"}
         %span.status
       .name
-        != "<h1>{{ user.firstName + ' ' + user.lastName }}</h1>"
+        != "<h1>{{ chat.to.firstName.split(' ')[0] + ' ' + chat.to.lastName.split(' ')[chat.to.lastName.split(' ').length - 1] }}</h1>"
       .controls{ layout: 'row', 'layout-align': 'initial center' }
         %i.material-icons.favorite{ 'ng-click': 'favorite($event)' } star
         .minimizeToggle

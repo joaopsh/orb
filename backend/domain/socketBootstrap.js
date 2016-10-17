@@ -36,6 +36,7 @@ var socketBootstrap = function(io) {
 
                     //bind the user informations with the socket
                     socket.user = {
+                        id: user._id.toString(),
                         email: user.email,
                         firstName: user.firstName,
                         lastName: user.lastName

@@ -5,7 +5,7 @@ class orbChatBox {
 		this.scope = {
 			panelMinimize:'&',
 			roomId:'@',
-			user:'=',
+			chat:'=',
 			chats: '='
 		};
 		this.restrict = 'E';
@@ -16,7 +16,7 @@ class orbChatBox {
 			scope.close = (event) => {
 				event.stopPropagation();
 				scope.chats = scope.chats.filter(function(chat) {
-					return chat.invitedUser.email !== scope.user.email;
+					return chat.to.email !== scope.chat.to.email;
 				});
 			}
 
@@ -31,7 +31,7 @@ class orbChatBox {
 
 				elem.find('.messages-box').prepend('<div class="me"><strong>'+ hours + ':' + minutes + ': </strong>'+ scope.message +'</div>');
 				chatSocketService.emit('chat:message:send', {
-					roomId: scope.roomId,
+					to: scope.chat.to,
 					text: scope.message
 				});
 				scope.message = '';

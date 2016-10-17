@@ -63,6 +63,7 @@ class MapController {
     else {
       userMarker.events = {
         click: this.newChatEventHandler.bind(this, {
+            id: userMarker.id,
             email: userMarker.email,
             firstName: userMarker.firstName,
             lastName: userMarker.lastName
@@ -98,6 +99,7 @@ class MapController {
       else {
         userMarker.events = {
           click: this.newChatEventHandler.bind(this, {
+            id: userMarker.id,
             email: userMarker.email,
             firstName: userMarker.firstName,
             lastName: userMarker.lastName
@@ -117,7 +119,7 @@ class MapController {
     });
 
     if(user.email !== this.$rootScope.userInfo.email)
-      this.chatSocketService.emit('chat:new', user);
+      this.chatSocketService.emit('chat:new', [user]);
 
   }
 

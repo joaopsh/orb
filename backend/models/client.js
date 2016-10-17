@@ -1,5 +1,4 @@
-var mongoose = require('mongoose')
-	, bcrypt = require('bcrypt');
+var mongoose = require('mongoose');
 
 var clientSchema = new mongoose.Schema({
 	name: {
