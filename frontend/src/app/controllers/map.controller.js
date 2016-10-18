@@ -9,7 +9,7 @@ class MapController {
 		  chatSocketService.disconnect();
 		});
 
-		chatSocketService.on('chat:online:list', (usersMarkers) => {
+		chatSocketService.socket.once('chat:online:list', (usersMarkers) => {
         this.chatOnlineListEventHandler(usersMarkers);
 
         // After recepted all online users, this event handle all new users or position change
@@ -18,13 +18,20 @@ class MapController {
         });
 
         // Removes the user that left the chat
-        chatSocketService.on('chat:signout', (outUserMarker) => {
+        chatSocketService.socket.once('chat:signout', (outUserMarker) => {
           this.chatSignoutEventHandler(outUserMarker);
         });
 
         // When a user opens a new window to chat with me, It sends an invitation
-        chatSocketService.on('chat:invitation:' + $rootScope.userInfo.email , (invitation) => {
-          console.log(invitation);
+        chatSocketService.on('chat:invitation:' + $rootScope.userInfo.id , (currentChat) => {
+          if(!chatSocketService.socket.hasListeners('chat:room:' + currentChat.roomId)) {
+            chatSocketService.on('chat:room:' + currentChat.roomId, (newMessage) => {
+              this.$rootScope.$broadcast('panelController:newMessage', {
+                chat: currentChat,
+                message: newMessage
+              });
+            });
+          }
         });
 
       });
@@ -37,7 +44,7 @@ class MapController {
   //Event handlers
   chatSignoutEventHandler(outUserMarker) {
     this.markers = this.markers.filter((userMarker) => {
-      return userMarker.email !== outUserMarker.email;
+      return userMarker.id !== outUserMarker.id;
     });
   }
 
@@ -45,7 +52,7 @@ class MapController {
     if(this.$rootScope.userInfo.email === userMarker.email) {
       this.config.center = userMarker.coords;
       userMarker.icon = {
-        url: '/dist/images/pin.png'
+        url: '/dist/images/pinme.png'
       };
       
     } else {
@@ -81,7 +88,7 @@ class MapController {
       if(this.$rootScope.userInfo.email === userMarker.email) {
         this.config.center = userMarker.coords;
         userMarker.icon = {
-          url: '/dist/images/pin.png'
+          url: '/dist/images/pinme.png'
         };
         
       } else {
@@ -113,14 +120,7 @@ class MapController {
   }
 
   newChatEventHandler(user) {
-    // Receive the new chat room identificator and opens the new chat window
-    this.chatSocketService.on('chat:new', (newChat) => {
-      this.$rootScope.$broadcast('panelController:newChat', newChat);
-    });
-
-    if(user.email !== this.$rootScope.userInfo.email)
-      this.chatSocketService.emit('chat:new', [user]);
-
+    this.$rootScope.$broadcast('panelController:newChat', [user]);
   }
 
 }

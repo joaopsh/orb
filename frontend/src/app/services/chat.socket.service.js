@@ -24,7 +24,7 @@ class chatSocketService {
     var interval = this.$interval(() => {
       intervalCounter++;
 
-      this.socket = io.connect(this.configs.socketioUrl + this.configs.chatNamespace, { reconnection: false, 'forceNew': true });
+      this.socket = io.connect(this.configs.socketioUrl + this.configs.chatNamespace, { reconnection: false });
 
       //if successfully connection event
       this.socket.on('connect', () => {

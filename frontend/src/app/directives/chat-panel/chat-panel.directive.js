@@ -5,7 +5,7 @@ class orbChatPanel {
 		this.scope = {};
 		this.restrict = 'E'
 		this.templateUrl =  '/dist/views/templates/chat-panel/chat-panel.template.html';
-		this.controller = ($rootScope) => new Controller($rootScope);
+		this.controller = ($rootScope, chatSocketService) => new Controller($rootScope, chatSocketService);
 		this.controllerAs = 'chatPanel';
 		this.link = function(scope, elem, attr, chatPanel) {
 			scope.minimizeToggle = true;

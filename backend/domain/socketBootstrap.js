@@ -8,6 +8,8 @@ var socketBootstrap = function(io) {
     //creates a namespace called "chat"
     var chat = io.of('/chat');
 
+    chatSocketHandler.init(chat);
+
     //chat authentication
     auth(chat, {
         authenticate: function (socket, data, callback) {
@@ -33,7 +35,7 @@ var socketBootstrap = function(io) {
 
                     if (!user)
                         return callback(new Error("User not found."));
-
+                    
                     //bind the user informations with the socket
                     socket.user = {
                         id: user._id.toString(),
@@ -48,7 +50,7 @@ var socketBootstrap = function(io) {
             
         },
         postAuthenticate: function(socket, data) {
-            chatSocketHandler(chat, socket);
+            chatSocketHandler.handler(socket);
         },
         timeout: 1000 * 10
     });

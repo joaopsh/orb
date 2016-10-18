@@ -2,6 +2,7 @@ var Q = require('q')
     , Chat = require('../models/chat')
     , Message = require('../models/message')
     , User = require('../models/user')
+    , helper = require('../helpers/utils')
     , mongoose = require('mongoose');
 
 var _createChatAndReturn = function(members) {
@@ -30,8 +31,9 @@ var _findChatByUsers = function(members) {
     var deferred = Q.defer();
 
     Chat.findOne(
-        { $and: [{ members: { $all: members } }, { members: { $size: members.length } }] },
-        function(err, chat) {
+        { $and: [{ members: { $all: members } }, { members: { $size: members.length } }] }
+        , '-__v'
+        , function(err, chat) {
             if(err)
                 deferred.reject(err);
 
@@ -51,7 +53,9 @@ var _getUsersByIds = function(ids) {
         mongoIds.push(new mongoose.Types.ObjectId(id));
     });
 
-    User.find({ _id: { $in: mongoIds }}, function(err, users) {
+    User.find({ _id: { $in: mongoIds }}
+    , '-__v'
+    , function(err, users) {
         if(err)
             deferred.reject(err);
 
@@ -64,9 +68,12 @@ var _getUsersByIds = function(ids) {
 var _getMessagesByChatId = function(chatId) {
     var deferred = Q.defer();
 
-    Message.find({ chatId: chatId }, '-_id -__v', function(err, messages) {
+    Message.find({ chatId: chatId }, '-__v').sort({ timestamp: 'desc' }).limit(15).exec(function(err, messages) {
         if(err)
             deferred.reject(err);
+        
+        // The older messages should be in the initial array positions, like a push natural behavior.
+        messages.reverse();
 
         deferred.resolve(messages);
     });
@@ -89,6 +96,50 @@ var _getChatOrCreateAndReturn = function(members) {
         }
 
     }, function(err) { deferred.reject(err); });
+
+    return deferred.promise;
+}
+
+var _addMessageAndReturn = function(message) {
+    var deferred = Q.defer();
+
+    var timestamp = helper.getUTCTimestamp();
+
+    new Message({
+        chatId: message.chatId,
+        from: message.from,
+        timestamp: timestamp,
+        text: message.text
+    }).save(function(err) {
+        if(err)
+            deferred.reject(err);
+
+        Message.findOne(
+            { $and: [{ timestamp: timestamp }, { chatId: message.chatId }] }
+            , '-__v',
+            function(err, message) {
+                if(err)
+                    deferred.reject(err);
+                
+                deferred.resolve(message);
+            });
+
+        
+
+    });
+
+    return deferred.promise;
+}
+
+var _getChatById = function(id) {
+    var deferred = Q.defer();
+
+    Chat.findOne({ _id: new mongoose.Types.ObjectId(id) }, '-__v', function(err, chat) {
+        if(err)
+            deferred.reject(err);
+
+        deferred.resolve(chat);
+    });
 
     return deferred.promise;
 }
@@ -124,9 +175,32 @@ var _getChatAndMembersAndMessagesService = function(members) {
     return deferred.promise;
 }
 
+var _addMessageAndReturnService = function(message) {
+    var deferred = Q.defer();
+
+    message.chatId = message.roomId;
+
+    _addMessageAndReturn(message).then(function(message){
+        deferred.resolve({
+            id: message._id.toString(),
+            roomId: message.chatId,
+            from: message.from,
+            timestamp: message.timestamp,
+            text: message.text
+        });
+
+    }, function(err){ deferred.reject(err); });
+
+    return deferred.promise;
+}
+
 exports.createChatAndReturn = _createChatAndReturn;
 exports.findChatByUsers = _findChatByUsers;
 exports.getUsersByIds = _getUsersByIds;
 exports.getMessagesByChatId = _getMessagesByChatId;
 exports.getChatOrCreateAndReturn = _getChatOrCreateAndReturn;
+exports.addMessageAndReturn = _addMessageAndReturn;
+exports.getChatById = _getChatById;
+
 exports.getChatAndMembersAndMessagesService = _getChatAndMembersAndMessagesService;
+exports.addMessageAndReturnService = _addMessageAndReturnService;

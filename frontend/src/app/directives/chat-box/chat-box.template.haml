@@ -5,13 +5,14 @@
         %ng-letter-avatar{ data: "Maria", shape: "round", fontFamily: "Open Sans", fontSize: "10px", height: "40px", width: "40px"}
         %span.status
       .name
-        != "<h1>{{ chat.to.firstName.split(' ')[0] + ' ' + chat.to.lastName.split(' ')[chat.to.lastName.split(' ').length - 1] }}</h1>"
+        != "<h1>{{ roomMemberNames }}</h1>"
       .controls{ layout: 'row', 'layout-align': 'initial center' }
         %i.material-icons.favorite{ 'ng-click': 'favorite($event)' } star
         .minimizeToggle
       %i.material-icons.close{ 'ng-click': 'close($event)' } close
   .content
     .messages-box
+      != "<div ng-repeat=\"message in chat.messages.slice().reverse()\" ng-class=\"isUserMessageFilter(message) ? 'me' : 'other'\"><strong>{{ message.time }}: </strong> {{ message.text }}</div>"
     .message-control
       .emojis{ layout: 'row', 'layout-align': 'center center' }
         %i.material-icons insert_emoticon

@@ -8,8 +8,11 @@ var config = require('../config.json')
     , repo = require('./chatSocketHandlerRepository');
 
 storage.on('connect', function() {
-    if(process.env.NODE_ENV === 'dev')
+    if(process.env.NODE_ENV === 'dev') {
         storage.del('chat.onlineList');
+    }
+
+    storage.del('subscribers');  
 
     console.log('Redis clients connected on HOST ' + config.redis.host + ':' + config.redis.port);
 });
@@ -17,13 +20,91 @@ storage.on('connect', function() {
 //It's limited to ten listeners. Zero means infinity
 sub.setMaxListeners(0);
 
+var _init = function(chatNamespace) {
+    sub.on('message', function(channel, message) {
+        switch(channel) {
+            case 'chat:position:update':
+                var data = JSON.parse(message);
+
+                chatNamespace.emit('chat:position:update', {
+                    id: data.id,
+                    email: data.email,
+                    firstName: data.firstName,
+                    lastName: data.lastName,
+                    coords: {
+                        latitude: data.latitude,
+                        longitude: data.longitude
+                    }
+                });
+            break;
+            case 'chat:signout':
+                chatNamespace.emit('chat:signout', JSON.parse(message));
+            break;
+            case 'chat:invitation':
+                var chat = JSON.parse(message);
+
+                chat.members.forEach(function(member) {
+                    for (var property in chatNamespace.connected) {
+                        if (chatNamespace.connected.hasOwnProperty(property)) {
+                            
+                            if(chatNamespace.connected[property].user.id === member.id) {
+                                chatNamespace.connected[property].emit('chat:invitation:' + chatNamespace.connected[property].user.id, chat);
+                                break;
+                            }
+                        }
+                    }
+                });
+
+            break;
+            case 'chat:message':
+                var parsedMessage = JSON.parse(message);
+
+                repo.getChatById(parsedMessage.roomId).then(function(chat){
+                    
+                    chat.members.forEach(function(memberId) {
+                        for (var property in chatNamespace.connected) {
+                            if (chatNamespace.connected.hasOwnProperty(property)) {
+                                
+                                if(chatNamespace.connected[property].user.id === memberId) {
+                                    chatNamespace.connected[property].emit('chat:room:' + chat.id, parsedMessage);
+                                    break;
+                                }
+                            }
+                        }
+                    });
+
+                }, function(err) { throw new Error(err) });
+            break;
+        }
+
+    });
+
+}
+
+//Global list of channels subscriptions (It should subscribes only once)
+var subs = [];
+
 //handler
-var chatSocketHandler = function(chat, socket) {
-    //subscribes
-    sub.subscribe('chat:position:update');
-    //It works like an invitation box to each user
-    sub.subscribe('chat:invitation:' + socket.user.email);
-    sub.subscribe('chat:signout');
+var _handler = function(socket) {
+    if(subs.indexOf('chat:position:update') === -1) {
+        subs.push('chat:position:update');
+        sub.subscribe('chat:position:update');
+    }
+
+    if(subs.indexOf('chat:signout') === -1) {
+        subs.push('chat:signout');
+        sub.subscribe('chat:signout');
+    }
+
+    if(subs.indexOf('chat:invitation') === -1) {
+        subs.push('chat:invitation');
+        sub.subscribe('chat:invitation');
+    }
+
+    if(subs.indexOf('chat:message') === -1) {
+        subs.push('chat:message');
+        sub.subscribe('chat:message');
+    }
 
     //receptors
     socket.on('chat:position:update', function(data) {
@@ -49,9 +130,14 @@ var chatSocketHandler = function(chat, socket) {
         pub.publish('chat:position:update', JSON.stringify(data));
     });
 
-    socket.on('chat:message', function(data) {
-        data.from = socket.user.email;
-        pub.publish('chat:room:' + data.roomId, JSON.stringify(data));
+    socket.on('chat:message:send', function(message) {
+        message.from = socket.user.id;
+
+        repo.addMessageAndReturnService(message).then(function(message) {
+            pub.publish('chat:message', JSON.stringify(message));
+
+        }, function(err) { throw err; });
+        
     });
 
     // Creates a chat room and invites the target user
@@ -67,45 +153,16 @@ var chatSocketHandler = function(chat, socket) {
 
         // Get an existing chat or create a new one, then gets the full user objects
         repo.getChatAndMembersAndMessagesService(invitedUsersIds).then(function(chat) {
-            sub.subscribe('chat:room:' + chat.roomId);
-
-            sub.on("message", function(channel, message) {
-                if(channel === ('chat:room:' + chat.roomId)) {
-                    socket.emit('chat:message', JSON.parse(message));
-                }
-            });
-
             socket.emit('chat:new', chat);
 
-            pub.publish('chat:invitation:' + invitedUser.email, JSON.stringify(chat));
+            if(subs.indexOf('chat:room:' + chat.roomId) === -1) {
+                subs.push('chat:room:' + chat.roomId);
+                sub.subscribe('chat:room:' + chat.roomId);
+            }
+
+            pub.publish('chat:invitation', JSON.stringify(chat));
         });
 
-    });
-
-    //handlers
-    sub.on('message', function(channel, message) {
-        switch(channel) {
-            case 'chat:position:update':
-                var data = JSON.parse(message);
-
-                socket.broadcast.emit('chat:position:update', {
-                    id: data.id,
-                    email: data.email,
-                    firstName: data.firstName,
-                    lastName: data.lastName,
-                    coords: {
-                        latitude: data.latitude,
-                        longitude: data.longitude
-                    }
-                });
-            break;
-            case 'chat:signout':
-                socket.emit('chat:signout', JSON.parse(message));
-            break;
-            case 'chat:invitation' + socket.user.email:
-                socket.emit('chat:invitation', JSON.parse(message));
-            break;
-        }
     });
 
     // Get online users
@@ -142,11 +199,12 @@ var chatSocketHandler = function(chat, socket) {
         storage.hdel('chat.onlineList', socket.user.email);
         
         pub.publish('chat:signout', JSON.stringify({
-            email: socket.user.email
+            id: socket.user.id
         }));
     });
 
     socket.emit('chat:ready', {});
 }
 
-module.exports = chatSocketHandler;
+exports.handler = _handler;
+exports.init = _init;

@@ -61,7 +61,7 @@ orb.controller('SidenavController', SidenavController);
 //directives register
 orb.directive('orbContactList', () => new contactListDirective());
 orb.directive('orbChatPanel', () => new chatPanelDirective());
-orb.directive('orbChatBox', (chatSocketService) => new chatBoxDirective(chatSocketService));
+orb.directive('orbChatBox', ($rootScope, chatSocketService) => new chatBoxDirective($rootScope, chatSocketService));
 orb.directive('orbSearch', () => new searchDirective());
 orb.directive('passwordCheck', () => new passwordCheckDirective());
 
