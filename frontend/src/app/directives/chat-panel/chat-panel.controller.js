@@ -1,8 +1,9 @@
 class ChatPanelController {
-	constructor($rootScope, chatSocketService) {
+	constructor($rootScope, $scope, chatSocketService) {
 		this.chats = [];
 		this.$rootScope = $rootScope;
 		this.chatSocketService = chatSocketService;
+		this.$scope = $scope;
 
 		$rootScope.$on('panelController:newChat', (event, users) => {
 			this.newChat(users);
@@ -35,7 +36,9 @@ class ChatPanelController {
 					message.time = this.getTime(message.timestamp);
 				});
 
-				this.chats.push(newChat);
+				this.$scope.$apply(() => {
+					this.chats.push(newChat);
+				});
 			});
 
 			this.chatSocketService.emit('chat:new', users);
@@ -45,7 +48,7 @@ class ChatPanelController {
 
 	newMessage(newMessage) {
 		var foundChat = this.chats.find((chat) => {
-			return chat.roomId === newMessage.chat.roomId;
+			return chat.id === newMessage.chat.id;
 		});
 
 		if(foundChat) {
@@ -56,8 +59,6 @@ class ChatPanelController {
 				time: this.getTime(newMessage.message.timestamp)
 			});
 		} else {
-			newMessage.chat.messages.push(newMessage.message);
-
 			angular.forEach(newMessage.chat.messages, (message) => {
 				message.time = this.getTime(message.timestamp);
 			});

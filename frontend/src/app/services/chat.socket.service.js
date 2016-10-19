@@ -1,5 +1,5 @@
 class chatSocketService {
-  constructor($state, $rootScope, $q, $interval, configs, OAuth, OAuthToken) {
+  constructor($state, $rootScope, $q, $interval, $timeout, configs, OAuth, OAuthToken) {
     this.$rootScope = $rootScope;
     this.$state = $state;
     this.$q = $q;
@@ -8,6 +8,7 @@ class chatSocketService {
     this.$interval = $interval;
     this.configs = configs;
     this.socket = undefined;
+    this.$timeout = $timeout;
 
   }
 
@@ -18,7 +19,7 @@ class chatSocketService {
       deferred.resolve();
       return deferred.promise;
     }
-      
+    
     var intervalCounter = 0;
 
     var interval = this.$interval(() => {
@@ -27,7 +28,7 @@ class chatSocketService {
       this.socket = io.connect(this.configs.socketioUrl + this.configs.chatNamespace, { reconnection: false });
 
       //if successfully connection event
-      this.socket.on('connect', () => {
+      this.socket.once('connect', () => {
         //notify
         console.log('socket::connected');
 
@@ -40,16 +41,21 @@ class chatSocketService {
         });
 
         //if successfully authentication event
-        this.socket.on('authenticated', () => {
+        this.socket.once('authenticated', () => {
           //notify
           console.log('socket::authenticated');
         });
 
         //After all server events are registered and the user location has been sent to server, the chat is ready to use.
-        this.socket.on('chat:ready', () => {
+        this.socket.once('chat:ready', () => {
           this.positionWatcher().then(
             (succ) => {
               this.$interval.cancel(interval);
+
+              if(this.$state.is('orb')) {
+                this.$rootScope.$broadcast('mapController:reconnect');
+              }
+
               deferred.resolve();
 
               //notify
@@ -62,7 +68,7 @@ class chatSocketService {
         });
 
         //if failed authentication event
-        this.socket.on('unauthorized', (err) => {
+        this.socket.once('unauthorized', (err) => {
           //notify
           console.log('socket::unauthorized');
 
@@ -74,7 +80,7 @@ class chatSocketService {
           }
         });
 
-        this.socket.on('disconnect', () => {
+        this.socket.once('disconnect', () => {
           //clears the location watch because It'll need to instantly update the location when reconnected
           navigator.geolocation.clearWatch(this.$rootScope.watchPos);
           this.$rootScope.watchPos = undefined;
@@ -94,7 +100,7 @@ class chatSocketService {
         deferred.reject();
       }
       
-    }, 2000);
+    }, 3000);
 
     return deferred.promise;
   }

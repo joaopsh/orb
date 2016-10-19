@@ -3,49 +3,61 @@ class MapController {
 		this.config = mapService.getDefaultConfig();
     this.chatSocketService = chatSocketService;
     this.$rootScope = $rootScope;
+    this.$scope = $scope;
 		
 		//on leaving the page It clears the socket listenners for not replicate the calls when the page is accessed again
 		$scope.$on('$destroy', function (event) {
 		  chatSocketService.disconnect();
 		});
 
-		chatSocketService.socket.once('chat:online:list', (usersMarkers) => {
+    $rootScope.$on('mapController:reconnect', (event) => {
+      this.initEventsHandler();
+		});
+
+		this.initEventsHandler();
+
+	}
+
+  initEventsHandler() {
+    if(!this.chatSocketService.socket.hasListeners('chat:online:list')){
+      this.chatSocketService.socket.once('chat:online:list', (usersMarkers) => {
         this.chatOnlineListEventHandler(usersMarkers);
 
         // After recepted all online users, this event handle all new users or position change
-        chatSocketService.on('chat:position:update', (userMarker) => {
-          this.chatPositionUpdateEventHandler(userMarker);
-        });
-
+        if(!this.chatSocketService.socket.hasListeners('chat:position:update')){
+          this.chatSocketService.on('chat:position:update', (userMarker) => {
+            this.chatPositionUpdateEventHandler(userMarker);
+          });
+        }
+        
         // Removes the user that left the chat
-        chatSocketService.socket.once('chat:signout', (outUserMarker) => {
-          this.chatSignoutEventHandler(outUserMarker);
-        });
-
-        // When a user opens a new window to chat with me, It sends an invitation
-        chatSocketService.on('chat:invitation:' + $rootScope.userInfo.id , (currentChat) => {
-          if(!chatSocketService.socket.hasListeners('chat:room:' + currentChat.roomId)) {
-            chatSocketService.on('chat:room:' + currentChat.roomId, (newMessage) => {
-              this.$rootScope.$broadcast('panelController:newMessage', {
-                chat: currentChat,
-                message: newMessage
-              });
-            });
-          }
-        });
+        if(!this.chatSocketService.socket.hasListeners('chat:signout')){
+          this.chatSocketService.on('chat:signout', (outUserMarker) => {
+            this.chatSignoutEventHandler(outUserMarker);
+          });
+        }
+        
+        //Receives all user's messages
+        if(!this.chatSocketService.socket.hasListeners('chat:room')) {
+          this.chatSocketService.on('chat:room', (newMessage) => {
+            this.$rootScope.$broadcast('panelController:newMessage', newMessage);
+          });
+        }
 
       });
 
       // Tells the server to send me the chat online users list (event catched above)
-      chatSocketService.emit('chat:online:list', {});
-
-	}
+      this.chatSocketService.emit('chat:online:list', {});
+    }
+  }
 
   //Event handlers
   chatSignoutEventHandler(outUserMarker) {
-    this.markers = this.markers.filter((userMarker) => {
-      return userMarker.id !== outUserMarker.id;
-    });
+    var toRemove = this.markers.find((userMarker) => {
+        return userMarker.id === outUserMarker.id;
+      });
+
+    this.markers.splice(this.markers.indexOf(toRemove), 1);
   }
 
   chatPositionUpdateEventHandler(userMarker) {

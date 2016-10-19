@@ -54,7 +54,7 @@ var _getUsersByIds = function(ids) {
     });
 
     User.find({ _id: { $in: mongoIds }}
-    , '-__v'
+    , '-__v -password'
     , function(err, users) {
         if(err)
             deferred.reject(err);
@@ -163,7 +163,7 @@ var _getChatAndMembersAndMessagesService = function(members) {
                 });
 
                 deferred.resolve({
-                    roomId: chat._id.toString(),
+                    id: chat._id.toString(),
                     members: handledUsers,
                     messages: messages
                 });
@@ -178,16 +178,41 @@ var _getChatAndMembersAndMessagesService = function(members) {
 var _addMessageAndReturnService = function(message) {
     var deferred = Q.defer();
 
-    message.chatId = message.roomId;
-
     _addMessageAndReturn(message).then(function(message){
-        deferred.resolve({
-            id: message._id.toString(),
-            roomId: message.chatId,
-            from: message.from,
-            timestamp: message.timestamp,
-            text: message.text
-        });
+        _getChatById(message.chatId).then(function(chat) {
+            _getMessagesByChatId(message.chatId).then(function(messages) {
+                 _getUsersByIds(chat.members).then(function(users) {
+                    var handledUsers = [];
+
+                    users.forEach(function(user) {
+                        handledUsers.push({
+                            id: user._id.toString(),
+                            email: user.email,
+                            firstName: user.firstName,
+                            lastName: user.lastName
+                        });
+                    });
+
+                    deferred.resolve({
+                        chat: {
+                            id: chat._id.toString(),
+                            members: handledUsers,
+                            messages: messages
+                        },
+                        message: {
+                            id: message._id.toString(),
+                            chatId: message.chatId,
+                            from: message.from,
+                            timestamp: message.timestamp,
+                            text: message.text
+                        }
+                    });
+
+                 }, function(err){ deferred.reject(err); });
+
+            }, function(err){ deferred.reject(err); });
+
+        }, function(err){ deferred.reject(err); });
 
     }, function(err){ deferred.reject(err); });
 

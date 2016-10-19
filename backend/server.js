@@ -41,7 +41,7 @@ app.use(function(req, res, next) {
 //routes register
 app.post('/oauth/token', oauth.token);
 app.use('/oauth', passport.authenticate('accessToken', { session: false }), tokenController);
-app.use('/user', passport.authenticate('accessToken', { session: false }), userController);
+app.use('/user', userController);
 app.use('/client', passport.authenticate('accessToken', { session: false }), clientController);
 
 app.listen(config.app.apiPort, function(){

@@ -3,9 +3,10 @@ var express = require('express')
   , crypto = require('crypto')
   , User = require('../models/user')
   , AccessToken = require('../models/accessToken')
-  , mongoose = require('mongoose');
+  , mongoose = require('mongoose')
+  , passport = require('passport');
 
-router.get('/', function(req, res) {
+router.get('/', passport.authenticate('accessToken', { session: false }), function(req, res) {
 	User.find({}, '-password -__v', function(err, users) {
 
     var results = users.map(function(user) {
@@ -26,7 +27,7 @@ router.get('/', function(req, res) {
 
 });
 
-router.get('/:id', function(req, res) {
+router.get('/:id', passport.authenticate('accessToken', { session: false }), function(req, res) {
   User.findOne({ _id: req.params.id }, '-password -__v', function(err, user) {
     if(err)
         return res.status(500).json({ status: 'ERROR', message: 'Internal Server Error.'});
@@ -50,7 +51,7 @@ router.get('/:id', function(req, res) {
 
 });
 
-router.get('/accesstoken/:accessToken', function(req, res) {
+router.get('/accesstoken/:accessToken', passport.authenticate('accessToken', { session: false }), function(req, res) {
   if(!req.params.accessToken)
     return res.status(400).json({ status: 'ERROR', message: 'Missing access token parameter.'});
   

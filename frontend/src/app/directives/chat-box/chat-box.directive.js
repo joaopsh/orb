@@ -4,7 +4,6 @@ class orbChatBox {
 	constructor($rootScope, chatSocketService) {
 		this.scope = {
 			panelMinimize:'&',
-			roomId:'@',
 			chat:'=',
 			chats: '='
 		};
@@ -30,7 +29,7 @@ class orbChatBox {
 				event.stopPropagation();
 
 				scope.chats = scope.chats.filter(function(chat) {
-					return chat.roomId !== scope.chat.roomId;
+					return chat.id !== scope.chat.id;
 				});
 			}
 
@@ -51,7 +50,7 @@ class orbChatBox {
 					var minutes = date.getMinutes().toString().length === 1 ? '0' + date.getMinutes() : date.getMinutes();
 
 					chatSocketService.emit('chat:message:send', {
-						roomId: scope.chat.roomId,
+						chatId: scope.chat.id,
 						text: scope.message
 					});
 

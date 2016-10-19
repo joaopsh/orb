@@ -40,40 +40,21 @@ var _init = function(chatNamespace) {
             case 'chat:signout':
                 chatNamespace.emit('chat:signout', JSON.parse(message));
             break;
-            case 'chat:invitation':
-                var chat = JSON.parse(message);
+            case 'chat:message':
+                var parsedMessage = JSON.parse(message);
 
-                chat.members.forEach(function(member) {
+                parsedMessage.chat.members.forEach(function(member) {
                     for (var property in chatNamespace.connected) {
                         if (chatNamespace.connected.hasOwnProperty(property)) {
                             
                             if(chatNamespace.connected[property].user.id === member.id) {
-                                chatNamespace.connected[property].emit('chat:invitation:' + chatNamespace.connected[property].user.id, chat);
+                                chatNamespace.connected[property].emit('chat:room', parsedMessage);
                                 break;
                             }
                         }
                     }
                 });
 
-            break;
-            case 'chat:message':
-                var parsedMessage = JSON.parse(message);
-
-                repo.getChatById(parsedMessage.roomId).then(function(chat){
-                    
-                    chat.members.forEach(function(memberId) {
-                        for (var property in chatNamespace.connected) {
-                            if (chatNamespace.connected.hasOwnProperty(property)) {
-                                
-                                if(chatNamespace.connected[property].user.id === memberId) {
-                                    chatNamespace.connected[property].emit('chat:room:' + chat.id, parsedMessage);
-                                    break;
-                                }
-                            }
-                        }
-                    });
-
-                }, function(err) { throw new Error(err) });
             break;
         }
 
@@ -136,7 +117,7 @@ var _handler = function(socket) {
         repo.addMessageAndReturnService(message).then(function(message) {
             pub.publish('chat:message', JSON.stringify(message));
 
-        }, function(err) { throw err; });
+        }, function(err) { throw new Error(err); });
         
     });
 
@@ -154,13 +135,6 @@ var _handler = function(socket) {
         // Get an existing chat or create a new one, then gets the full user objects
         repo.getChatAndMembersAndMessagesService(invitedUsersIds).then(function(chat) {
             socket.emit('chat:new', chat);
-
-            if(subs.indexOf('chat:room:' + chat.roomId) === -1) {
-                subs.push('chat:room:' + chat.roomId);
-                sub.subscribe('chat:room:' + chat.roomId);
-            }
-
-            pub.publish('chat:invitation', JSON.stringify(chat));
         });
 
     });

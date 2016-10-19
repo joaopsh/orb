@@ -3,5 +3,5 @@
     .container
       %div{ 'ng-controller': 'MapController as map' }
         %ui-gmap-google-map{ center: 'map.config.center', zoom: 'map.config.zoom', options: 'map.config.options' }
-          != "<ui-gmap-marker ng-repeat=\"marker in map.markers\" idkey=\"marker.email\" coords=\"marker.coords\" icon=\"marker.icon\" events=\"marker.events\"></ui-gmap-marker>"
+          != "<ui-gmap-markers models=\"map.markers\" idkey=\"'email'\" coords=\"'coords'\" icon=\"'icon'\" events=\"'events'\"></ui-gmap-markers>"
   %orb-chat-panel

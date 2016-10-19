@@ -415,51 +415,66 @@
 	    this.config = mapService.getDefaultConfig();
 	    this.chatSocketService = chatSocketService;
 	    this.$rootScope = $rootScope;
+	    this.$scope = $scope;
 
 	    //on leaving the page It clears the socket listenners for not replicate the calls when the page is accessed again
 	    $scope.$on('$destroy', function (event) {
 	      chatSocketService.disconnect();
 	    });
 
-	    chatSocketService.socket.once('chat:online:list', function (usersMarkers) {
-	      _this.chatOnlineListEventHandler(usersMarkers);
-
-	      // After recepted all online users, this event handle all new users or position change
-	      chatSocketService.on('chat:position:update', function (userMarker) {
-	        _this.chatPositionUpdateEventHandler(userMarker);
-	      });
-
-	      // Removes the user that left the chat
-	      chatSocketService.socket.once('chat:signout', function (outUserMarker) {
-	        _this.chatSignoutEventHandler(outUserMarker);
-	      });
-
-	      // When a user opens a new window to chat with me, It sends an invitation
-	      chatSocketService.on('chat:invitation:' + $rootScope.userInfo.id, function (currentChat) {
-	        if (!chatSocketService.socket.hasListeners('chat:room:' + currentChat.roomId)) {
-	          chatSocketService.on('chat:room:' + currentChat.roomId, function (newMessage) {
-	            _this.$rootScope.$broadcast('panelController:newMessage', {
-	              chat: currentChat,
-	              message: newMessage
-	            });
-	          });
-	        }
-	      });
+	    $rootScope.$on('mapController:reconnect', function (event) {
+	      _this.initEventsHandler();
 	    });
 
-	    // Tells the server to send me the chat online users list (event catched above)
-	    chatSocketService.emit('chat:online:list', {});
+	    this.initEventsHandler();
 	  }
 
-	  //Event handlers
-
-
 	  _createClass(MapController, [{
+	    key: 'initEventsHandler',
+	    value: function initEventsHandler() {
+	      var _this2 = this;
+
+	      if (!this.chatSocketService.socket.hasListeners('chat:online:list')) {
+	        this.chatSocketService.socket.once('chat:online:list', function (usersMarkers) {
+	          _this2.chatOnlineListEventHandler(usersMarkers);
+
+	          // After recepted all online users, this event handle all new users or position change
+	          if (!_this2.chatSocketService.socket.hasListeners('chat:position:update')) {
+	            _this2.chatSocketService.on('chat:position:update', function (userMarker) {
+	              _this2.chatPositionUpdateEventHandler(userMarker);
+	            });
+	          }
+
+	          // Removes the user that left the chat
+	          if (!_this2.chatSocketService.socket.hasListeners('chat:signout')) {
+	            _this2.chatSocketService.on('chat:signout', function (outUserMarker) {
+	              _this2.chatSignoutEventHandler(outUserMarker);
+	            });
+	          }
+
+	          //Receives all user's messages
+	          if (!_this2.chatSocketService.socket.hasListeners('chat:room')) {
+	            _this2.chatSocketService.on('chat:room', function (newMessage) {
+	              _this2.$rootScope.$broadcast('panelController:newMessage', newMessage);
+	            });
+	          }
+	        });
+
+	        // Tells the server to send me the chat online users list (event catched above)
+	        this.chatSocketService.emit('chat:online:list', {});
+	      }
+	    }
+
+	    //Event handlers
+
+	  }, {
 	    key: 'chatSignoutEventHandler',
 	    value: function chatSignoutEventHandler(outUserMarker) {
-	      this.markers = this.markers.filter(function (userMarker) {
-	        return userMarker.id !== outUserMarker.id;
+	      var toRemove = this.markers.find(function (userMarker) {
+	        return userMarker.id === outUserMarker.id;
 	      });
+
+	      this.markers.splice(this.markers.indexOf(toRemove), 1);
 	    }
 	  }, {
 	    key: 'chatPositionUpdateEventHandler',
@@ -495,13 +510,13 @@
 	  }, {
 	    key: 'chatOnlineListEventHandler',
 	    value: function chatOnlineListEventHandler(usersMarkers) {
-	      var _this2 = this;
+	      var _this3 = this;
 
 	      this.markers = [];
 
 	      angular.forEach(usersMarkers, function (userMarker) {
-	        if (_this2.$rootScope.userInfo.email === userMarker.email) {
-	          _this2.config.center = userMarker.coords;
+	        if (_this3.$rootScope.userInfo.email === userMarker.email) {
+	          _this3.config.center = userMarker.coords;
 	          userMarker.icon = {
 	            url: '/dist/images/pinme.png'
 	          };
@@ -511,13 +526,13 @@
 	          };
 	        }
 
-	        var foundMarker = _this2.markers.find(function (elem) {
+	        var foundMarker = _this3.markers.find(function (elem) {
 	          return elem.email === userMarker.email;
 	        });
 
 	        if (foundMarker) foundMarker.coords = userMarker.coords;else {
 	          userMarker.events = {
-	            click: _this2.newChatEventHandler.bind(_this2, {
+	            click: _this3.newChatEventHandler.bind(_this3, {
 	              id: userMarker.id,
 	              email: userMarker.email,
 	              firstName: userMarker.firstName,
@@ -525,7 +540,7 @@
 	            })
 	          };
 
-	          _this2.markers.push(userMarker);
+	          _this3.markers.push(userMarker);
 	        }
 	      });
 	    }
@@ -844,7 +859,7 @@
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	var chatSocketService = function () {
-	  function chatSocketService($state, $rootScope, $q, $interval, configs, OAuth, OAuthToken) {
+	  function chatSocketService($state, $rootScope, $q, $interval, $timeout, configs, OAuth, OAuthToken) {
 	    _classCallCheck(this, chatSocketService);
 
 	    this.$rootScope = $rootScope;
@@ -855,6 +870,7 @@
 	    this.$interval = $interval;
 	    this.configs = configs;
 	    this.socket = undefined;
+	    this.$timeout = $timeout;
 	  }
 
 	  _createClass(chatSocketService, [{
@@ -877,7 +893,7 @@
 	        _this.socket = io.connect(_this.configs.socketioUrl + _this.configs.chatNamespace, { reconnection: false });
 
 	        //if successfully connection event
-	        _this.socket.on('connect', function () {
+	        _this.socket.once('connect', function () {
 	          //notify
 	          console.log('socket::connected');
 
@@ -890,15 +906,20 @@
 	          });
 
 	          //if successfully authentication event
-	          _this.socket.on('authenticated', function () {
+	          _this.socket.once('authenticated', function () {
 	            //notify
 	            console.log('socket::authenticated');
 	          });
 
 	          //After all server events are registered and the user location has been sent to server, the chat is ready to use.
-	          _this.socket.on('chat:ready', function () {
+	          _this.socket.once('chat:ready', function () {
 	            _this.positionWatcher().then(function (succ) {
 	              _this.$interval.cancel(interval);
+
+	              if (_this.$state.is('orb')) {
+	                _this.$rootScope.$broadcast('mapController:reconnect');
+	              }
+
 	              deferred.resolve();
 
 	              //notify
@@ -909,7 +930,7 @@
 	          });
 
 	          //if failed authentication event
-	          _this.socket.on('unauthorized', function (err) {
+	          _this.socket.once('unauthorized', function (err) {
 	            //notify
 	            console.log('socket::unauthorized');
 
@@ -921,7 +942,7 @@
 	            }
 	          });
 
-	          _this.socket.on('disconnect', function () {
+	          _this.socket.once('disconnect', function () {
 	            //clears the location watch because It'll need to instantly update the location when reconnected
 	            navigator.geolocation.clearWatch(_this.$rootScope.watchPos);
 	            _this.$rootScope.watchPos = undefined;
@@ -939,7 +960,7 @@
 	          _this.$interval.cancel(interval);
 	          deferred.reject();
 	        }
-	      }, 2000);
+	      }, 3000);
 
 	      return deferred.promise;
 	    }
@@ -1289,8 +1310,8 @@
 		this.scope = {};
 		this.restrict = 'E';
 		this.templateUrl = '/dist/views/templates/chat-panel/chat-panel.template.html';
-		this.controller = function ($rootScope, chatSocketService) {
-			return new _chatPanel2.default($rootScope, chatSocketService);
+		this.controller = function ($rootScope, $scope, chatSocketService) {
+			return new _chatPanel2.default($rootScope, $scope, chatSocketService);
 		};
 		this.controllerAs = 'chatPanel';
 		this.link = function (scope, elem, attr, chatPanel) {
@@ -1326,7 +1347,7 @@
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	var ChatPanelController = function () {
-		function ChatPanelController($rootScope, chatSocketService) {
+		function ChatPanelController($rootScope, $scope, chatSocketService) {
 			var _this = this;
 
 			_classCallCheck(this, ChatPanelController);
@@ -1334,6 +1355,7 @@
 			this.chats = [];
 			this.$rootScope = $rootScope;
 			this.chatSocketService = chatSocketService;
+			this.$scope = $scope;
 
 			$rootScope.$on('panelController:newChat', function (event, users) {
 				_this.newChat(users);
@@ -1370,7 +1392,9 @@
 							message.time = _this2.getTime(message.timestamp);
 						});
 
-						_this2.chats.push(newChat);
+						_this2.$scope.$apply(function () {
+							_this2.chats.push(newChat);
+						});
 					});
 
 					this.chatSocketService.emit('chat:new', users);
@@ -1382,7 +1406,7 @@
 				var _this3 = this;
 
 				var foundChat = this.chats.find(function (chat) {
-					return chat.roomId === _newMessage.chat.roomId;
+					return chat.id === _newMessage.chat.id;
 				});
 
 				if (foundChat) {
@@ -1393,8 +1417,6 @@
 						time: this.getTime(_newMessage.message.timestamp)
 					});
 				} else {
-					_newMessage.chat.messages.push(_newMessage.message);
-
 					angular.forEach(_newMessage.chat.messages, function (message) {
 						message.time = _this3.getTime(message.timestamp);
 					});
@@ -1442,7 +1464,6 @@
 
 		this.scope = {
 			panelMinimize: '&',
-			roomId: '@',
 			chat: '=',
 			chats: '='
 		};
@@ -1469,7 +1490,7 @@
 				event.stopPropagation();
 
 				scope.chats = scope.chats.filter(function (chat) {
-					return chat.roomId !== scope.chat.roomId;
+					return chat.id !== scope.chat.id;
 				});
 			};
 
@@ -1490,7 +1511,7 @@
 					var minutes = date.getMinutes().toString().length === 1 ? '0' + date.getMinutes() : date.getMinutes();
 
 					chatSocketService.emit('chat:message:send', {
-						roomId: scope.chat.roomId,
+						chatId: scope.chat.id,
 						text: scope.message
 					});
 

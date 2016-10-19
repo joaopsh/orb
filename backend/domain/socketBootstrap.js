@@ -52,7 +52,7 @@ var socketBootstrap = function(io) {
         postAuthenticate: function(socket, data) {
             chatSocketHandler.handler(socket);
         },
-        timeout: 1000 * 10
+        timeout: 1000 * 20
     });
 }
 
